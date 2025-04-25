@@ -4,10 +4,13 @@ import com.moura.authorization.groups.entities.Permission;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 
-@AllArgsConstructor
 public class SecurityAuthority implements GrantedAuthority {
 
     private final Permission permission;
+
+    public SecurityAuthority(Permission permission) {
+        this.permission = permission;
+    }
 
     @Override
     public String getAuthority() {

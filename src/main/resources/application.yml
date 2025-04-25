@@ -2,6 +2,10 @@ spring:
   application:
     name: namf-authorization
   profiles:
-    active: dev
+    active: ${PROFILE_ACTIVE}
   config:
     import: optional:file:.env[.properties]
+
+secret:
+  key:
+    value: ${SECRET_KEY}
