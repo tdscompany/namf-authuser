@@ -1,21 +1,23 @@
 package com.moura.authorization.users.entities;
 
 import com.moura.authorization.auth.entities.Credentials;
+import com.moura.authorization.auth.entities.SecurityAuthority;
 import com.moura.authorization.groups.entities.Group;
+import com.moura.authorization.utils.MessageUtils;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedBy;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Table(name = "users")
 @Entity
 @Data
-public class User {
+public class User implements UserDetails {
     @Id
     @GeneratedValue(generator = "uuid7")
     @Column(unique = true, nullable = false)
@@ -27,13 +29,16 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column()
+    private UUID organizationId;
+
     @Column
     private String description;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private Set<Credentials> credentials;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_groups",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -66,4 +71,25 @@ public class User {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return groups.stream()
+                .flatMap(group -> group.getPermissions().stream())
+                .map(SecurityAuthority::new)
+                .toList();
+    }
+
+    @Override
+    public String getPassword() {
+        return credentials.stream().filter(Credentials::isActive).findFirst()
+                .map(Credentials::getPassword)
+                .orElseThrow(() -> new NoSuchElementException(MessageUtils.get("error.not_active_credentials")));
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
 }

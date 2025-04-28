@@ -2,9 +2,10 @@ package com.moura.authorization;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 @SpringBootApplication
-public class NamfAuthorizationApplication {
+public class NamfAuthorizationApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
         SpringApplication.run(NamfAuthorizationApplication.class, args);

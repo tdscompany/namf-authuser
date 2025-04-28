@@ -24,7 +24,7 @@ public class Group {
     @Column(unique = true, nullable = false)
     private String name;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "group_permissions",
             joinColumns = @JoinColumn(name = "group_id"),

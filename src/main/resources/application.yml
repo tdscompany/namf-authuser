@@ -5,7 +5,13 @@ spring:
     active: ${PROFILE_ACTIVE}
   config:
     import: optional:file:.env[.properties]
+  messages:
+    basename: messages
 
-secret:
+jwt:
   key:
     value: ${SECRET_KEY}
+  expiration:
+    access: 3600000
+    refresh: 7
+

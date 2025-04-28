@@ -1,7 +1,6 @@
 package com.moura.authorization.auth.entities;
 
 import com.moura.authorization.groups.entities.Permission;
-import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 
 public class SecurityAuthority implements GrantedAuthority {
