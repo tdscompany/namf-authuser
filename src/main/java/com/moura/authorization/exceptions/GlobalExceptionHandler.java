@@ -12,12 +12,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.time.Instant;
 
-import static com.moura.authorization.utils.MessageUtils.messageSource;
-
-
 @ControllerAdvice
 public class GlobalExceptionHandler {
-
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponseDTO> handleBadCredentialsException(BadCredentialsException e, HttpServletRequest request) {
@@ -26,20 +22,6 @@ public class GlobalExceptionHandler {
                 .timestamp(Instant.now())
                 .error("Unauthorized")
                 .message(MessageUtils.get("error.invalid_credentials"))
-                .status(HttpStatus.UNAUTHORIZED.value())
-                .path(request.getRequestURI())
-                .build();
-
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
-    }
-
-    @ExceptionHandler(JwtAuthenticationException.class)
-    public ResponseEntity<ErrorResponseDTO> handleJwtAuthorizationException(JwtAuthenticationException e, HttpServletRequest request) {
-
-        ErrorResponseDTO error = ErrorResponseDTO.builder()
-                .timestamp(Instant.now())
-                .error("Unauthorized")
-                .message(e.getMessage())
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .path(request.getRequestURI())
                 .build();

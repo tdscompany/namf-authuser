@@ -1,7 +1,7 @@
 package com.moura.authorization.auth.services;
 
 import com.moura.authorization.configs.TenantResolver;
-import com.moura.authorization.configs.security.TenantContext;
+import com.moura.authorization.context.TenantContext;
 import com.moura.authorization.configs.security.providers.JwtProvider;
 import com.moura.authorization.auth.dtos.AuthDto;
 import com.moura.authorization.auth.dtos.TokenDto;

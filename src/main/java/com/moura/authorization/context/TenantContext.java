@@ -1,4 +1,4 @@
-package com.moura.authorization.configs.security;
+package com.moura.authorization.context;
 
 import java.util.UUID;
 

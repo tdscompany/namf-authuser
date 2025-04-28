@@ -2,6 +2,7 @@ package com.moura.authorization.exceptions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.moura.authorization.utils.MessageUtils;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -31,9 +32,8 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         ErrorResponseDTO error = ErrorResponseDTO.builder()
                 .timestamp(Instant.now())
                 .error("Unauthorized")
-                .message(authException.getMessage())
+                .message(MessageUtils.get("error.token_expired"))
                 .status(HttpStatus.UNAUTHORIZED.value())
-                .path(request.getRequestURI())
                 .build();
 
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
