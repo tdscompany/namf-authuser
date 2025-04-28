@@ -1,4 +1,4 @@
-package com.moura.authorization.dtos;
+package com.moura.authorization.auth.dtos;
 
 import jakarta.validation.constraints.NotBlank;
 

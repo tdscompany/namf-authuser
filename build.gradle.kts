@@ -40,6 +40,13 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+tasks.test {
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+    }
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
 }

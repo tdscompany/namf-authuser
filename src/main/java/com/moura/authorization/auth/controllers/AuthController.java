@@ -1,17 +1,11 @@
 package com.moura.authorization.auth.controllers;
 
 import com.moura.authorization.auth.services.AuthService;
-import com.moura.authorization.configs.security.managers.CustomAuthenticationManager;
-import com.moura.authorization.configs.security.providers.JwtProvider;
-import com.moura.authorization.dtos.AuthDto;
-import com.moura.authorization.dtos.TokenDto;
-import com.nimbusds.jose.JOSEException;
+import com.moura.authorization.auth.dtos.AuthDto;
+import com.moura.authorization.auth.dtos.TokenDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 

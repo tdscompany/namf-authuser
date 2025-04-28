@@ -1,14 +1,14 @@
-package com.moura.authorization.dtos;
+package com.moura.authorization.auth.dtos;
 
 import lombok.Data;
 
 import java.io.Serializable;
 
 @Data
-public class TokenDto implements Serializable {
-    private static final long serialVersionUID = 1L;
-    private String token;
+public class TokenDto {
     private String refreshToken;
+    private String token;
+
     private String type = "Bearer";
 
     public TokenDto(String accessToken, String refreshToken) {
