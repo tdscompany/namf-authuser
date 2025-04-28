@@ -29,25 +29,17 @@ public class JwtProvider {
         return Algorithm.HMAC256(jwtSecret);
     }
 
-    public String generateAccessToken(Authentication authentication, UUID tenantIdFromHeader) {
+    public String generateAccessToken(Authentication authentication, UUID tenantId) {
         User user = (User) authentication.getPrincipal();
-        UUID organizationId = user.getOrganizationId();
-
-        UUID tenantId = (organizationId != null) ? organizationId : tenantIdFromHeader;
-
-        if (tenantId == null) {
-            throw new IllegalStateException("Tenant ID must be provided for superadmin users.");
-        }
-
         Instant now = Instant.now();
+
         return JWT.create()
                 .withSubject(user.getId().toString())
-                .withClaim("roles", user.getAuthorities().stream()
+                .withClaim("roles", authentication.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
                         .toList())
                 .withClaim("org_id", tenantId.toString())
                 .withIssuedAt(Date.from(now))
-                .withNotBefore(Date.from(now))
                 .withExpiresAt(Date.from(now.plusMillis(accessTokenExpirationMs)))
                 .sign(getAlgorithm());
     }
@@ -55,6 +47,7 @@ public class JwtProvider {
     public String generateRefreshToken(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         Instant now = Instant.now();
+
         return JWT.create()
                 .withSubject(user.getId().toString())
                 .withIssuedAt(Date.from(now))
@@ -64,28 +57,19 @@ public class JwtProvider {
 
     public boolean validateJwt(String token) {
         try {
-            JWT.require(getAlgorithm())
-                    .build()
-                    .verify(token);
+            JWT.require(getAlgorithm()).build().verify(token);
             return true;
-        } catch (JWTVerificationException ex) {
+        } catch (JWTVerificationException e) {
             return false;
         }
     }
 
     public String getSubjectFromJwt(String token) {
-        return JWT.require(getAlgorithm())
-                .build()
-                .verify(token)
-                .getSubject();
+        return JWT.require(getAlgorithm()).build().verify(token).getSubject();
     }
 
     public UUID getTenantIdFromJwt(String token) {
-        String orgId = JWT.require(getAlgorithm())
-                .build()
-                .verify(token)
-                .getClaim("org_id")
-                .asString();
-        return orgId != null ? UUID.fromString(orgId) : null;
+        String orgId = JWT.require(getAlgorithm()).build().verify(token).getClaim("org_id").asString();
+        return UUID.fromString(orgId);
     }
 }

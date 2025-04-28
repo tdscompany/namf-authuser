@@ -1,13 +1,14 @@
 package com.moura.authorization.users.entities;
 
-import com.moura.authorization.auth.entities.Credentials;
 import com.moura.authorization.auth.entities.SecurityAuthority;
+import com.moura.authorization.enums.UserStatus;
 import com.moura.authorization.groups.entities.Group;
 import com.moura.authorization.utils.MessageUtils;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -46,10 +47,15 @@ public class User implements UserDetails {
     )
     private Set<Group> groups;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private UserStatus userStatus;
+
     @CreatedBy
     @ManyToOne(fetch = FetchType.LAZY)
     private User createdBy;
 
+    @LastModifiedBy
     @ManyToOne(fetch = FetchType.LAZY)
     private User updatedBy;
 

@@ -1,6 +1,5 @@
-package com.moura.authorization.auth.entities;
+package com.moura.authorization.users.entities;
 
-import com.moura.authorization.users.entities.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

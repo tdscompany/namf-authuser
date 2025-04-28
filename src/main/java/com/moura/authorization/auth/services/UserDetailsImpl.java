@@ -1,7 +1,7 @@
 package com.moura.authorization.auth.services;
 
 import com.moura.authorization.auth.repositories.CredentialsRepository;
-import com.moura.authorization.groups.repositories.UserRepository;
+import com.moura.authorization.users.repositories.UserRepository;
 import com.moura.authorization.users.entities.User;
 import com.moura.authorization.utils.MessageUtils;
 import org.springframework.security.core.userdetails.UserDetails;

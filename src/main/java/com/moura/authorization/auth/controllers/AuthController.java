@@ -1,5 +1,6 @@
 package com.moura.authorization.auth.controllers;
 
+import com.moura.authorization.auth.services.AuthService;
 import com.moura.authorization.configs.security.managers.CustomAuthenticationManager;
 import com.moura.authorization.configs.security.providers.JwtProvider;
 import com.moura.authorization.dtos.AuthDto;
@@ -20,13 +21,11 @@ import java.util.UUID;
 @RequestMapping("/auth")
 public class AuthController {
 
-    final private JwtProvider jwtProvider;
 
-    final private AuthenticationManager customAuthenticationManager;
+    private final AuthService authService;
 
-    public AuthController(JwtProvider jwtProvider, AuthenticationManager customAuthenticationManager) {
-        this.jwtProvider = jwtProvider;
-        this.customAuthenticationManager = customAuthenticationManager;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
 
@@ -34,7 +33,6 @@ public class AuthController {
     @GetMapping("/demo")
     public String demo() {
         var u = SecurityContextHolder.getContext().getAuthentication();
-        u.getAuthorities().forEach(System.out::println);
         return "Hello, this is a demo endpoint!";
     }
 
@@ -43,16 +41,7 @@ public class AuthController {
             @RequestBody AuthDto authDto,
             @RequestHeader(value = "X-Tenant-ID", required = false) UUID tenantId
     ) {
-
-        Authentication authentication = customAuthenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(authDto.username(), authDto.password())
-        );
-        
-        if (authentication.isAuthenticated()) SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        var accessToken = jwtProvider.generateAccessToken(authentication,tenantId);
-        var refreshToken = jwtProvider.generateRefreshToken(authentication);
-
-        return ResponseEntity.status(HttpStatus.OK).body(new TokenDto(accessToken, refreshToken));
+        TokenDto token = authService.authenticate(authDto, tenantId);
+        return ResponseEntity.status(HttpStatus.OK).body(token);
     }
 }

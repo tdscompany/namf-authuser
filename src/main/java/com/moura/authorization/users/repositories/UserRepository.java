@@ -1,6 +1,5 @@
-package com.moura.authorization.groups.repositories;
+package com.moura.authorization.users.repositories;
 
-import com.moura.authorization.auth.entities.Credentials;
 import com.moura.authorization.users.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

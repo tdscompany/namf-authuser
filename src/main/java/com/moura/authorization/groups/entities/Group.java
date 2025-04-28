@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -36,6 +37,7 @@ public class Group {
     @ManyToOne(fetch = FetchType.LAZY)
     private User createdBy;
 
+    @LastModifiedBy
     @ManyToOne(fetch = FetchType.LAZY)
     private User updatedBy;
 
