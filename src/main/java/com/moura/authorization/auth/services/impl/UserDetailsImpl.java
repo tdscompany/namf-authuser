@@ -1,4 +1,4 @@
-package com.moura.authorization.auth.services;
+package com.moura.authorization.auth.services.impl;
 
 import com.moura.authorization.auth.repositories.CredentialsRepository;
 import com.moura.authorization.users.repositories.UserRepository;

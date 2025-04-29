@@ -1,7 +1,7 @@
 package com.moura.authorization.configs.security.filters;
 
 import com.moura.authorization.auth.entities.SecurityAuthority;
-import com.moura.authorization.auth.services.UserDetailsImpl;
+import com.moura.authorization.auth.services.impl.UserDetailsImpl;
 import com.moura.authorization.context.TenantContext;
 import com.moura.authorization.configs.security.providers.JwtProvider;
 import com.moura.authorization.groups.entities.Permission;
@@ -41,7 +41,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
         try {
             String token = extractToken(request);
 
@@ -72,7 +71,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         User user = (User) userDetailsService.loadUserByUserId(UUID.fromString(userId));
 
-        List<GrantedAuthority> authorities = loadAuthoritiesForUser(user);
+        if (user.getOrganizationId() != null) {
+            TenantContext.setCurrentTenant(user.getOrganizationId());
+        }
+
+        List<SecurityAuthority> authorities = loadAuthoritiesForUser(user);
 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 user, null, authorities
@@ -81,7 +84,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
-    private List<GrantedAuthority> loadAuthoritiesForUser(User user) {
+    private List<SecurityAuthority> loadAuthoritiesForUser(User user) {
         if (user.getOrganizationId() == null) {
             return permissionRepository.findAll()
                     .stream()
@@ -90,7 +93,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } else {
             return user.getAuthorities()
                     .stream()
-                    .map(authority -> new SecurityAuthority((Permission) authority))
+                    .filter(authority -> authority instanceof SecurityAuthority)
+                    .map(authority -> (SecurityAuthority) authority)
                     .collect(Collectors.toList());
         }
     }

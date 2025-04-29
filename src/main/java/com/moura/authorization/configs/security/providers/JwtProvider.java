@@ -61,7 +61,7 @@ public class JwtProvider {
             JWT.require(getAlgorithm()).build().verify(token);
             return true;
         } catch (JWTVerificationException e) {
-            throw new JwtException("Invalid JWT token");
+           return false;
         }
     }
 

@@ -3,17 +3,43 @@ package com.moura.authorization.exceptions;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.moura.authorization.utils.MessageUtils;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    private MessageSource messageSource;
+
+    public GlobalExceptionHandler(MessageSource messageSource){
+        this.messageSource = messageSource;
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<List<ErrorResponseDTO>> MethodArgumentNotValidException(MethodArgumentNotValidException e){
+        List<ErrorResponseDTO> dto = new ArrayList<>();
+
+        e.getBindingResult().getFieldErrors().forEach(err -> {
+            String message = messageSource.getMessage(err, LocaleContextHolder.getLocale());
+            ErrorResponseDTO error = ErrorResponseDTO.builder()
+                    .message(message)
+                    .field(err.getField())
+                    .build();
+            dto.add(error);
+        });
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(dto);
+    }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponseDTO> handleBadCredentialsException(BadCredentialsException e, HttpServletRequest request) {

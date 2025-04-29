@@ -3,7 +3,6 @@ package com.moura.authorization.groups.entities;
 import com.moura.authorization.users.entities.User;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;

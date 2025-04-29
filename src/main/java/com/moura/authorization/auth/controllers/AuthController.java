@@ -1,33 +1,52 @@
 package com.moura.authorization.auth.controllers;
 
-import com.moura.authorization.auth.services.AuthService;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.moura.authorization.auth.dtos.AuthDto;
 import com.moura.authorization.auth.dtos.TokenDto;
+import com.moura.authorization.auth.services.AuthService;
+import com.moura.authorization.users.dtos.UserDTO;
+import com.moura.authorization.users.mappers.UserMapper;
+import com.moura.authorization.users.services.UserService;
+import com.moura.authorization.utils.MessageUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/v1/auth")
 public class AuthController {
 
+    private final UserService userService;
 
     private final AuthService authService;
 
-    public AuthController(AuthService authService) {
+    private final UserMapper userMapper;
+
+    public AuthController(UserService userService, AuthService authService, UserMapper userMapper) {
+        this.userService = userService;
         this.authService = authService;
+        this.userMapper = userMapper;
     }
 
 
     @PreAuthorize("hasAuthority('user:write')")
-    @GetMapping("/demo")
-    public String demo() {
-        var u = SecurityContextHolder.getContext().getAuthentication();
-        return "Hello, this is a demo endpoint!";
+    @PostMapping("/signup")
+    public ResponseEntity<Object> signup(
+            @RequestBody @Validated(UserDTO.UserView.RegistrationPost.class)
+            @JsonView(UserDTO.UserView.RegistrationPost.class) UserDTO userDto
+    ) {
+        if (userService.existsByEmail(userDto.getEmail())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", MessageUtils.get("conflict.email_already_exists")));
+        }
+        var userEntity = userMapper.toEntity(userDto);
+        userService.save(userEntity);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(userEntity);
     }
 
     @PostMapping()

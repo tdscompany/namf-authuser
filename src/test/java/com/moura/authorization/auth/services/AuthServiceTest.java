@@ -2,6 +2,7 @@ package com.moura.authorization.auth.services;
 
 import com.moura.authorization.auth.dtos.AuthDto;
 import com.moura.authorization.auth.dtos.TokenDto;
+import com.moura.authorization.auth.services.impl.AuthServiceImpl;
 import com.moura.authorization.configs.TenantResolver;
 import com.moura.authorization.configs.security.providers.JwtProvider;
 import com.moura.authorization.groups.entities.Permission;
@@ -43,7 +44,7 @@ class AuthServiceTest {
     private PermissionRepository permissionRepository;
 
     @InjectMocks
-    private AuthService authService;
+    private AuthServiceImpl authService;
 
 
     @Test
@@ -79,7 +80,7 @@ class AuthServiceTest {
         TokenDto tokenDto = authService.authenticate(authDto, tenantId);
 
         assertNotNull(tokenDto);
-        assertEquals("access-token-superadmin", tokenDto.getToken());
+        assertEquals("access-token-superadmin", tokenDto.getAccessToken());
         assertEquals("refresh-token-superadmin", tokenDto.getRefreshToken());
 
         Authentication contextAuth = SecurityContextHolder.getContext().getAuthentication();
@@ -119,7 +120,7 @@ class AuthServiceTest {
         TokenDto tokenDto = authService.authenticate(authDto, UUID.randomUUID());
 
         assertNotNull(tokenDto);
-        assertEquals("access-token", tokenDto.getToken());
+        assertEquals("access-token", tokenDto.getAccessToken());
         assertEquals("refresh-token", tokenDto.getRefreshToken());
 
         verify(authenticationManager, times(1)).authenticate(any());

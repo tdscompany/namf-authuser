@@ -1,5 +1,6 @@
 package com.moura.authorization.users.repositories;
 
+
 import com.moura.authorization.users.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -27,4 +28,11 @@ public interface UserRepository extends JpaRepository<User, UUID> {
       WHERE u.id = :id
     """)
     Optional<User> findById(@Param("id") UUID id);
+
+    @Query("""
+      SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END
+      FROM User u
+      WHERE u.email = :email AND u.userStatus = 'ACTIVE'
+    """)
+    boolean existsByEmail(String email);
 }

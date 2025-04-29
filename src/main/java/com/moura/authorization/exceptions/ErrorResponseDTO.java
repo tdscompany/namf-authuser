@@ -12,10 +12,9 @@ import java.time.Instant;
 public class ErrorResponseDTO {
 
     private String message;
-    private int status;
+    private Integer status;
     private String error;
     private Instant timestamp;
     private String path;
-
-
+    private String field;
 }
