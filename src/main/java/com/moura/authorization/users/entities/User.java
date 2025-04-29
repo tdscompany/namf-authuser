@@ -30,11 +30,17 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(nullable = false)
+    private String telefone;
+
     @Column()
     private UUID organizationId;
 
     @Column
     private String description;
+
+    @Transient
+    private String passwordNotEncoded;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private Set<Credentials> credentials;

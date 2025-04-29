@@ -7,6 +7,7 @@ import com.moura.authorization.validation.EmailConstraint;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -28,12 +29,21 @@ public class UserDTO {
     @JsonView(UserView.RegistrationPost.class)
     private String password;
 
+
+    @JsonView(UserView.RegistrationPost.class)
+    private Set<UUID> groupIds;
+
     @NotBlank(groups = UserView.PasswordPut.class)
     @JsonView(UserView.PasswordPut.class)
     private String oldPassword;
 
+    @NotBlank(groups = {UserView.RegistrationPost.class})
     @JsonView({UserView.RegistrationPost.class})
     private String name;
+
+    @NotBlank(groups = {UserView.RegistrationPost.class})
+    @JsonView({UserView.RegistrationPost.class})
+    private String telefone;
 
     @JsonView({UserView.RegistrationPost.class})
     private String description;

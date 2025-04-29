@@ -21,6 +21,10 @@ public class Group {
     @GeneratedValue(generator = "uuid7")
     private UUID id;
 
+    @Column
+    private UUID organizationId;
+
+
     @Column(unique = true, nullable = false)
     private String name;
 
