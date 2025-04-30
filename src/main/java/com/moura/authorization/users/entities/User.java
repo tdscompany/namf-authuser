@@ -6,18 +6,20 @@ import com.moura.authorization.groups.entities.Group;
 import com.moura.authorization.utils.MessageUtils;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
-@Table(name = "users")
 @Entity
 @Data
+@EntityListeners(AuditingEntityListener.class)
 public class User implements UserDetails {
     @Id
     @GeneratedValue(generator = "uuid7")
@@ -58,19 +60,25 @@ public class User implements UserDetails {
     private UserStatus userStatus;
 
     @CreatedBy
+    @JoinColumn(nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     private User createdBy;
 
     @LastModifiedBy
+    @JoinColumn(nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     private User updatedBy;
 
-    @CreationTimestamp
-    @Column(nullable = false, columnDefinition = "TIMESTAMP")
+    @CreatedDate
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(columnDefinition = "TIMESTAMP")
+    @LastModifiedDate
+    @Column(updatable = false)
     private LocalDateTime updatedAt;
+
+    @Version
+    private Long version;
 
     @Override
     public boolean equals(Object o) {

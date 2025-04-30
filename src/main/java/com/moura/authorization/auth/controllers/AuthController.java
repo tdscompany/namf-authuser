@@ -36,7 +36,6 @@ public class AuthController {
         this.userMapper = userMapper;
     }
 
-
     @PostMapping("/signup")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<Object> signup(

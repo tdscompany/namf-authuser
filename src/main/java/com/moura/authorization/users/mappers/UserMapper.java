@@ -28,6 +28,7 @@ public interface UserMapper {
     @Mapping(target = "organizationId", ignore = true)
     @Mapping(target = "authorities", ignore = true)
     @Mapping(target = "passwordNotEncoded", ignore = true)
+    @Mapping(target = "version", ignore = true)
     User toEntity(UserDTO dto);
 
     @Mapping(target = "groupIds", source = "groups", qualifiedByName = "mapGroupsToIds")

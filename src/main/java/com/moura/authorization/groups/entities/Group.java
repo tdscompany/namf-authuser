@@ -5,7 +5,10 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -14,6 +17,7 @@ import java.util.UUID;
 
 @Entity
 @Data
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "groups")
 public class Group {
 
@@ -37,19 +41,25 @@ public class Group {
     private Set<Permission> permissions;
 
     @CreatedBy
+    @JoinColumn(nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     private User createdBy;
 
     @LastModifiedBy
+    @JoinColumn(nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     private User updatedBy;
 
-    @CreationTimestamp
-    @Column(nullable = false, columnDefinition = "TIMESTAMP")
+    @CreatedDate
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(columnDefinition = "TIMESTAMP")
+    @LastModifiedDate
+    @Column(updatable = false)
     private LocalDateTime updatedAt;
+
+    @Version
+    private Long version;
 
     @Override
     public boolean equals(Object o) {
