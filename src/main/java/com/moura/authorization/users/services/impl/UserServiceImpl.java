@@ -1,18 +1,18 @@
 package com.moura.authorization.users.services.impl;
 
-import com.moura.authorization.configs.security.AuthenticationCurrentUserService;
+import com.moura.authorization.auth.repositories.CredentialsRepository;
 import com.moura.authorization.context.TenantContext;
 import com.moura.authorization.enums.UserStatus;
 import com.moura.authorization.users.entities.Credentials;
 import com.moura.authorization.users.entities.User;
 import com.moura.authorization.users.repositories.UserRepository;
+import com.moura.authorization.users.services.CredentialsService;
 import com.moura.authorization.users.services.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -20,14 +20,15 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
+    private final CredentialsService credentialsService;
+
     private final PasswordEncoder passwordEncoder;
 
-    private final AuthenticationCurrentUserService authenticationCurrentUserService;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationCurrentUserService authenticationCurrentUserService) {
+    public UserServiceImpl(UserRepository userRepository, CredentialsService credentialsService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.credentialsService = credentialsService;
         this.passwordEncoder = passwordEncoder;
-        this.authenticationCurrentUserService = authenticationCurrentUserService;
     }
 
     @Override
@@ -42,21 +43,16 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public User createUser(User entity) {
-        User currentUser = authenticationCurrentUserService.getCurrentUser();
-        UUID tenant = TenantContext.getCurrentTenant();
-
-        entity.setOrganizationId(tenant);
-
-        Credentials credentials = new Credentials();
-        credentials.setPassword(passwordEncoder.encode(entity.getPasswordNotEncoded()));
-        credentials.setActive(true);
-        credentials.setCreatedBy(currentUser);
-        credentials.setUser(entity);
-
-        entity.setCredentials(Set.of(credentials));
+    public User create(User entity) {
+        entity.setOrganizationId(TenantContext.getCurrentTenant());
         entity.setUserStatus(UserStatus.ACTIVE);
 
-        return userRepository.save(entity);
+        var user = userRepository.save(entity);
+
+        credentialsService.create(new Credentials(
+                passwordEncoder.encode(entity.getPasswordNotEncoded()), user
+        ));
+
+        return user;
     }
 }

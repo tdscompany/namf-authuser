@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.moura.authorization.auth.dtos.AuthDto;
 import com.moura.authorization.auth.dtos.TokenDto;
 import com.moura.authorization.auth.services.AuthService;
-import com.moura.authorization.groups.entities.Group;
 import com.moura.authorization.users.dtos.UserDTO;
 import com.moura.authorization.users.entities.User;
 import com.moura.authorization.users.mappers.UserMapper;
@@ -17,7 +16,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -51,7 +49,7 @@ public class AuthController {
         user.setPasswordNotEncoded(userDto.getPassword());
 
 
-        User created = userService.createUser(user);
+        User created = userService.create(user);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toDTO(created));
     }

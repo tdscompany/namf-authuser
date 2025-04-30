@@ -2,10 +2,8 @@ package com.moura.authorization.users.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -43,4 +41,10 @@ public class Credentials  {
 
     @Column(nullable = false)
     private boolean active;
+
+    public Credentials(String password, User user) {
+        this.password = password;
+        this.active = true;
+        this.user = user;
+    }
 }

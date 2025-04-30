@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
+@Table(name = "users")
 @Data
 @EntityListeners(AuditingEntityListener.class)
 public class User implements UserDetails {

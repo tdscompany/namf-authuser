@@ -18,14 +18,14 @@ public interface UserRepository extends JpaRepository<User, UUID> {
       LEFT JOIN FETCH g.permissions
       WHERE u.email = :email
     """)
-    Optional<User> findByEmail(@Param("email") String username);
+    Optional<User> findByEmail(@Param("email") String email);
 
     @Override
     @Query("""
       SELECT u FROM User u
       LEFT JOIN FETCH u.groups g
       LEFT JOIN FETCH g.permissions
-      WHERE u.id = :id
+      WHERE u.id = :id AND u.userStatus = 'ACTIVE'
     """)
     Optional<User> findById(@Param("id") UUID id);
 
