@@ -21,10 +21,4 @@ public class MessageConfig {
         return messageSource;
     }
 
-    @Bean
-    public LocaleResolver localeResolver() {
-        SessionLocaleResolver slr = new SessionLocaleResolver();
-        slr.setDefaultLocale(Locale.forLanguageTag("pt-BR"));
-        return slr;
-    }
 }

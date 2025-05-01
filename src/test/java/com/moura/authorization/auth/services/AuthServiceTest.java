@@ -3,7 +3,7 @@ package com.moura.authorization.auth.services;
 import com.moura.authorization.auth.dtos.AuthDto;
 import com.moura.authorization.auth.dtos.TokenDto;
 import com.moura.authorization.auth.services.impl.AuthServiceImpl;
-import com.moura.authorization.configs.TenantResolver;
+import com.moura.authorization.configs.resolvers.TenantResolver;
 import com.moura.authorization.configs.security.providers.JwtProvider;
 import com.moura.authorization.groups.entities.Permission;
 import com.moura.authorization.groups.repositories.PermissionRepository;

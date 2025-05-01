@@ -1,12 +1,16 @@
 package com.moura.authorization.users.dtos;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.moura.authorization.enums.UserStatus;
+import com.moura.authorization.groups.dtos.GroupDTO;
 import com.moura.authorization.validation.EmailConstraint;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
@@ -32,6 +36,13 @@ public class UserDTO {
 
     @JsonView(UserView.RegistrationPost.class)
     private Set<UUID> groupIds;
+
+    private Set<GroupDTO> groups;
+
+    private UserStatus userStatus;
+
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    private LocalDateTime createdAt;
 
     @NotBlank(groups = UserView.PasswordPut.class)
     @JsonView(UserView.PasswordPut.class)

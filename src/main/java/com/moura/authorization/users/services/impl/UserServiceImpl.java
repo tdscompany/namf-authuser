@@ -1,19 +1,24 @@
 package com.moura.authorization.users.services.impl;
 
-import com.moura.authorization.auth.repositories.CredentialsRepository;
 import com.moura.authorization.context.TenantContext;
 import com.moura.authorization.enums.UserStatus;
+import com.moura.authorization.users.dtos.UserDTO;
 import com.moura.authorization.users.entities.Credentials;
 import com.moura.authorization.users.entities.User;
 import com.moura.authorization.users.repositories.UserRepository;
 import com.moura.authorization.users.services.CredentialsService;
 import com.moura.authorization.users.services.UserService;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -54,5 +59,29 @@ public class UserServiceImpl implements UserService {
         ));
 
         return user;
+    }
+
+    @Override
+    public Page<User> findAll(Specification<User> spec, Pageable pageable) {
+        Page<User> page = userRepository.findAll(spec, pageable);
+
+        if (page.isEmpty()) return page;
+
+        List<UUID> userIds = page.getContent().stream()
+                .map(User::getId)
+                .toList();
+
+        List<User> userWithGroups = userIds.isEmpty()
+                ? Collections.emptyList()
+                : userRepository.findAllWithGroupsByIds(userIds);
+
+        Map<UUID, User> usersEnrichedMap = userWithGroups.stream()
+                .collect(Collectors.toMap(User::getId, Function.identity()));
+
+        List<User> orderedUsers = page.getContent().stream()
+                .map(u -> usersEnrichedMap.getOrDefault(u.getId(), u))
+                .toList();
+
+        return new PageImpl<>(orderedUsers, pageable, page.getTotalElements());
     }
 }

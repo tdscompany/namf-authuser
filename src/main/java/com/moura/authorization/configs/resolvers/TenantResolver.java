@@ -1,4 +1,4 @@
-package com.moura.authorization.configs;
+package com.moura.authorization.configs.resolvers;
 
 import com.moura.authorization.exceptions.MissingTenantIdException;
 import com.moura.authorization.exceptions.NotFoundException;
