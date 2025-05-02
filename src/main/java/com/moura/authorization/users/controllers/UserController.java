@@ -1,16 +1,15 @@
 package com.moura.authorization.users.controllers;
 
-import com.moura.authorization.context.TenantContext;
-import com.moura.authorization.specifications.SpecificationTemplate;
 import com.moura.authorization.users.dtos.UserDTO;
+import com.moura.authorization.users.dtos.UserFilterDTO;
 import com.moura.authorization.users.entities.User;
 import com.moura.authorization.users.mappers.UserMapper;
+import com.moura.authorization.users.repositories.specification.UserSpecification;
 import com.moura.authorization.users.services.UserService;
 import com.moura.authorization.utils.MessageUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,25 +35,11 @@ public class UserController {
     @GetMapping
     @PreAuthorize("hasAuthority('user:read')")
     public ResponseEntity<Page<UserDTO>> getAllUsers(
-            SpecificationTemplate.UserSpec spec,
-            @RequestParam(required = false) UUID groupId,
+            @ModelAttribute UserFilterDTO filter,
             @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Specification<User> finalSpec = SpecificationTemplate.tenantFilter();
-
-        if (spec != null) {
-            finalSpec = finalSpec.and(spec);
-        }
-
-        if (groupId != null) {
-            finalSpec = finalSpec.and(SpecificationTemplate.userGroupId(groupId));
-        }
-
-        Page<User> users = userService.findAll(finalSpec, pageable);
-
-        Page<UserDTO> dtoPage = userMapper.toDTOPage(users);
-
-        return ResponseEntity.ok(dtoPage);
+        Page<User> users = userService.findAll(UserSpecification.of(filter), pageable);
+        return ResponseEntity.ok(userMapper.toDTOPage(users));
     }
 
     @DeleteMapping("/{userId}")

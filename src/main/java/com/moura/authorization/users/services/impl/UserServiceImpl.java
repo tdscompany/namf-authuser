@@ -1,7 +1,7 @@
 package com.moura.authorization.users.services.impl;
 
 import com.moura.authorization.context.TenantContext;
-import com.moura.authorization.enums.UserStatus;
+import com.moura.authorization.users.enums.UserStatus;
 import com.moura.authorization.users.entities.Credentials;
 import com.moura.authorization.users.entities.User;
 import com.moura.authorization.users.repositories.UserRepository;

@@ -2,9 +2,11 @@ package com.moura.authorization.users.mappers;
 
 import com.moura.authorization.groups.entities.Group;
 import com.moura.authorization.groups.repositories.GroupRepository;
-import com.moura.authorization.specifications.SpecificationTemplate;
+import com.moura.authorization.groups.repositories.specification.GroupSpecification;
 import com.moura.authorization.users.dtos.UserDTO;
+import com.moura.authorization.users.dtos.UserFilterDTO;
 import com.moura.authorization.users.entities.User;
+import com.moura.authorization.users.repositories.specification.UserSpecification;
 import org.modelmapper.Conditions;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
@@ -32,9 +34,7 @@ public class UserMapper {
         Converter<Set<UUID>, Set<Group>> groupIdToGroupConverter = ctx -> {
             Set<UUID> groupIds = ctx.getSource();
             if (groupIds == null || groupIds.isEmpty()) return Collections.emptySet();
-            return new HashSet<>(groupRepository.findAll(
-                    SpecificationTemplate.tenantAndIdIn("id", groupIds)
-            ));
+            return new HashSet<>(groupRepository.findAll(GroupSpecification.idIn(groupIds)));
         };
 
         modelMapper.typeMap(UserDTO.class, User.class)

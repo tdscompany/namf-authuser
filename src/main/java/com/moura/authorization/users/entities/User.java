@@ -1,7 +1,7 @@
 package com.moura.authorization.users.entities;
 
 import com.moura.authorization.auth.entities.SecurityAuthority;
-import com.moura.authorization.enums.UserStatus;
+import com.moura.authorization.users.enums.UserStatus;
 import com.moura.authorization.groups.entities.Group;
 import com.moura.authorization.utils.MessageUtils;
 import jakarta.persistence.*;

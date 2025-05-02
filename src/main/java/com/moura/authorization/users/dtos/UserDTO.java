@@ -4,7 +4,7 @@ package com.moura.authorization.users.dtos;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.moura.authorization.enums.UserStatus;
+import com.moura.authorization.users.enums.UserStatus;
 import com.moura.authorization.groups.dtos.GroupDTO;
 import com.moura.authorization.validation.EmailConstraint;
 import jakarta.validation.constraints.NotBlank;
