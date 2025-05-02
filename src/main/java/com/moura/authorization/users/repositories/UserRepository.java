@@ -40,4 +40,13 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
 
     @Query("SELECT DISTINCT u FROM User u LEFT JOIN FETCH u.groups WHERE u.id IN :ids")
     List<User> findAllWithGroupsByIds(@Param("ids") List<UUID> ids);
+
+
+    @Query("""
+      SELECT u FROM User u
+      LEFT JOIN FETCH u.groups g
+      LEFT JOIN FETCH g.permissions
+      WHERE u.id = :id AND u.organizationId = :currentTenant
+    """)
+    Optional<User> findByIdAndTenant(UUID id, UUID currentTenant);
 }

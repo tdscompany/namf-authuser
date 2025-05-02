@@ -37,7 +37,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<User> findById(UUID userId) {
-        return userRepository.findById(userId);
+        var tenantId = TenantContext.getCurrentTenant();
+        return userRepository.findByIdAndTenant(userId, tenantId);
     }
 
     @Override
@@ -89,5 +90,10 @@ public class UserServiceImpl implements UserService {
     public void inactivate(User entity) {
         entity.setUserStatus(UserStatus.DELETED);
         userRepository.save(entity);
+    }
+
+    @Transactional
+    public User update(User entity) {
+        return userRepository.save(entity);
     }
 }

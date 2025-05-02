@@ -19,7 +19,7 @@ public class GroupIdMapper {
     }
 
     public Set<Group> map(Set<UUID> groupIds) {
-        if (groupIds == null || groupIds.isEmpty()) return new HashSet<>();
+        if (groupIds == null || groupIds.isEmpty()) return null;
         return new HashSet<>(groupRepository.findAll(SpecificationTemplate.tenantAndIdIn("id", groupIds)));
     }
 }

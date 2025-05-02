@@ -75,5 +75,24 @@ public class UserController {
 
     }
 
+    @PutMapping("/{userId}")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<Object> update(
+            @PathVariable UUID userId,
+            @RequestBody UserDTO userDto
+    ) {
+        var userModelOptional = userService.findById(userId);
+        if (userModelOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", MessageUtils.get("error.user_not_found")));
+        }
+
+        var userModel = userModelOptional.get();
+        userMapper.updateEntityFromDTO(userDto, userModel);
+
+        var updatedUser = userService.update(userModel);
+
+        return ResponseEntity.ok(userMapper.toDTO(updatedUser));
+    }
 
 }

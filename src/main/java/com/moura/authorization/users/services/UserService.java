@@ -14,4 +14,5 @@ public interface UserService {
     User create(User entity);
     Page<User> findAll(Specification<User> spec, Pageable pageable);
     void inactivate(User entity);
+    User update(User entity);
 }

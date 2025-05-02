@@ -20,12 +20,13 @@ public class UserDTO {
     public interface UserView {
         public static interface RegistrationPost{}
         public static  interface PasswordPut {}
+        public static  interface UserPut {}
     }
 
     private UUID id;
 
     @NotBlank(groups = {UserView.RegistrationPost.class})
-    @JsonView(UserView.RegistrationPost.class)
+    @JsonView({UserView.RegistrationPost.class, UserView.UserPut.class})
     @EmailConstraint(groups = {UserView.RegistrationPost.class})
     private String email;
 
@@ -34,11 +35,12 @@ public class UserDTO {
     private String password;
 
 
-    @JsonView(UserView.RegistrationPost.class)
+    @JsonView({UserView.RegistrationPost.class, UserView.UserPut.class})
     private Set<UUID> groupIds;
 
     private Set<GroupDTO> groups;
 
+    @JsonView({UserView.UserPut.class})
     private UserStatus userStatus;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
@@ -49,13 +51,13 @@ public class UserDTO {
     private String oldPassword;
 
     @NotBlank(groups = {UserView.RegistrationPost.class})
-    @JsonView({UserView.RegistrationPost.class})
+    @JsonView({UserView.RegistrationPost.class, UserView.UserPut.class})
     private String name;
 
     @NotBlank(groups = {UserView.RegistrationPost.class})
-    @JsonView({UserView.RegistrationPost.class})
+    @JsonView({UserView.RegistrationPost.class, UserView.UserPut.class})
     private String telefone;
 
-    @JsonView({UserView.RegistrationPost.class})
+    @JsonView({UserView.RegistrationPost.class, UserView.UserPut.class})
     private String description;
 }
