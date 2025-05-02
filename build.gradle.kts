@@ -37,7 +37,7 @@ dependencies {
     implementation("org.hibernate.orm:hibernate-jpamodelgen")
     runtimeOnly("org.postgresql:postgresql")
     annotationProcessor("org.projectlombok:lombok")
-    implementation("org.mapstruct:mapstruct:1.5.5.Final")
+    implementation("org.modelmapper:modelmapper:3.2.2")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
