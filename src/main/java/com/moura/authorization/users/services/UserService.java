@@ -13,4 +13,5 @@ public interface UserService {
     boolean existsByEmail(String email);
     User create(User entity);
     Page<User> findAll(Specification<User> spec, Pageable pageable);
+    void inactivate(User entity);
 }

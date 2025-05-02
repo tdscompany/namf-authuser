@@ -2,7 +2,6 @@ package com.moura.authorization.users.services.impl;
 
 import com.moura.authorization.context.TenantContext;
 import com.moura.authorization.enums.UserStatus;
-import com.moura.authorization.users.dtos.UserDTO;
 import com.moura.authorization.users.entities.Credentials;
 import com.moura.authorization.users.entities.User;
 import com.moura.authorization.users.repositories.UserRepository;
@@ -38,7 +37,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<User> findById(UUID userId) {
-        return Optional.empty();
+        return userRepository.findById(userId);
     }
 
     @Override
@@ -83,5 +82,12 @@ public class UserServiceImpl implements UserService {
                 .toList();
 
         return new PageImpl<>(orderedUsers, pageable, page.getTotalElements());
+    }
+
+    @Transactional
+    @Override
+    public void inactivate(User entity) {
+        entity.setUserStatus(UserStatus.DELETED);
+        userRepository.save(entity);
     }
 }
