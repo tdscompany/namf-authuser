@@ -22,36 +22,10 @@ import java.util.UUID;
 @RequestMapping("/v1/auth")
 public class AuthController {
 
-    private final UserService userService;
-
     private final AuthService authService;
 
-    private final UserMapper userMapper;
-
-    public AuthController(UserService userService, AuthService authService,UserMapper userMapper) {
-        this.userService = userService;
+    public AuthController(AuthService authService) {
         this.authService = authService;
-        this.userMapper = userMapper;
-    }
-
-    @PostMapping("/signup")
-    @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<Object> signup(
-            @RequestBody @Validated(UserDTO.UserView.RegistrationPost.class)
-            @JsonView(UserDTO.UserView.RegistrationPost.class) UserDTO userDto) {
-
-        if (userService.existsByEmail(userDto.getEmail())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("message", MessageUtils.get("conflict.email_already_exists")));
-        }
-
-        User user = userMapper.toEntity(userDto);
-        user.setPasswordNotEncoded(userDto.getPassword());
-
-
-        User created = userService.create(user);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toDTO(created));
     }
 
     @PostMapping()

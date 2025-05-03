@@ -1,5 +1,6 @@
 package com.moura.authorization.users.controllers;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.moura.authorization.users.dtos.UserDTO;
 import com.moura.authorization.users.dtos.UserFilterDTO;
 import com.moura.authorization.users.entities.User;
@@ -14,6 +15,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -30,6 +32,25 @@ public class UserController {
     public UserController(UserService userService, UserMapper userMapper) {
         this.userService = userService;
         this.userMapper = userMapper;
+    }
+
+    @PostMapping("/register")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<Object> signup(
+            @RequestBody @Validated(UserDTO.UserView.RegistrationPost.class)
+            @JsonView(UserDTO.UserView.RegistrationPost.class) UserDTO userDto) {
+
+        if (userService.existsByEmail(userDto.getEmail())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", MessageUtils.get("conflict.email_already_exists")));
+        }
+
+        User user = userMapper.toEntity(userDto);
+        user.setPasswordNotEncoded(userDto.getPassword());
+
+        User created = userService.create(user);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toDTO(created));
     }
 
     @GetMapping
