@@ -92,6 +92,8 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public void inactivate(User entity) {
+        if (entity.getUserStatus() == UserStatus.DELETED) return;
+
         entity.setUserStatus(UserStatus.DELETED);
         userRepository.save(entity);
     }
