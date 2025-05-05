@@ -1,13 +1,15 @@
 package com.moura.authorization.users.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.moura.authorization.groups.services.GroupService;
 import com.moura.authorization.users.dtos.UserDTO;
 import com.moura.authorization.users.dtos.UserFilterDTO;
 import com.moura.authorization.users.entities.User;
-import com.moura.authorization.users.mappers.UserMapper;
 import com.moura.authorization.users.repositories.specification.UserSpecification;
 import com.moura.authorization.users.services.UserService;
 import com.moura.authorization.utils.MessageUtils;
+import org.modelmapper.Conditions;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -27,11 +29,14 @@ public class UserController {
 
     private final UserService userService;
 
-    private final UserMapper userMapper;
+    private final GroupService groupService;
 
-    public UserController(UserService userService, UserMapper userMapper) {
+    private final ModelMapper modelMapper;
+
+    public UserController(UserService userService, GroupService groupService, ModelMapper modelMapper) {
         this.userService = userService;
-        this.userMapper = userMapper;
+        this.groupService = groupService;
+        this.modelMapper = modelMapper;
     }
 
     @PostMapping("/register")
@@ -45,12 +50,18 @@ public class UserController {
                     .body(Map.of("message", MessageUtils.get("conflict.email_already_exists")));
         }
 
-        User user = userMapper.toEntity(userDto);
+        if (!groupService.validateGroupIds(userDto.getGroupIds())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", MessageUtils.get("error.group_not_found")));
+        }
+
+        User user = modelMapper.map(userDto, User.class);
         user.setPasswordNotEncoded(userDto.getPassword());
 
         User created = userService.create(user);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toDTO(created));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(modelMapper.map(created, UserDTO.class));
     }
 
     @GetMapping
@@ -59,8 +70,10 @@ public class UserController {
             @ModelAttribute UserFilterDTO filter,
             @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<User> users = userService.findAll(UserSpecification.of(filter), pageable);
-        return ResponseEntity.ok(userMapper.toDTOPage(users));
+        Page<UserDTO> result = userService.findAll(UserSpecification.of(filter), pageable)
+                .map(user -> modelMapper.map(user, UserDTO.class));
+
+        return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
     @DeleteMapping("/{userId}")
@@ -85,7 +98,7 @@ public class UserController {
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<Object> update(
             @PathVariable UUID userId,
-            @RequestBody UserDTO userDto
+            @RequestBody @JsonView(UserDTO.UserView.UserPut.class) UserDTO userDto
     ) {
         var userModelOptional = userService.findById(userId);
         if (userModelOptional.isEmpty()) {
@@ -93,12 +106,18 @@ public class UserController {
                     .body(Map.of("message", MessageUtils.get("error.user_not_found")));
         }
 
+        if (!groupService.validateGroupIds(userDto.getGroupIds())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", MessageUtils.get("error.group_not_found")));
+        }
+
         var userModel = userModelOptional.get();
-        userMapper.updateEntityFromDTO(userDto, userModel);
+        modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
+        modelMapper.map(userDto, userModel);
 
-        var updatedUser = userService.update(userModel);
+        var updated = userService.update(userModel);
 
-        return ResponseEntity.ok(userMapper.toDTO(updatedUser));
+        return ResponseEntity.status(HttpStatus.OK).body(modelMapper.map(updated, UserDTO.class));
     }
 
 }

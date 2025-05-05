@@ -1,7 +1,10 @@
 package com.moura.authorization.users.mappers;
 
 import com.moura.authorization.groups.entities.Group;
+import com.moura.authorization.groups.mappers.converter.GroupIdToGroupConverter;
+import com.moura.authorization.groups.mappers.converter.GroupToGroupDTOConverter;
 import com.moura.authorization.groups.repositories.GroupRepository;
+import com.moura.authorization.mappers.UserMapperConfigurer;
 import com.moura.authorization.users.dtos.UserDTO;
 import com.moura.authorization.users.entities.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -18,8 +22,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserMapperTest {
@@ -27,74 +30,73 @@ class UserMapperTest {
     @Mock
     private GroupRepository groupRepository;
 
-    private UserMapper userMapper;
+    private ModelMapper modelMapper;
 
     @BeforeEach
     void setUp() {
-        userMapper = new UserMapper(groupRepository);
+        GroupToGroupDTOConverter toDtoConverter = new GroupToGroupDTOConverter();
+        GroupIdToGroupConverter toEntityConverter = new GroupIdToGroupConverter(groupRepository);
+        UserMapperConfigurer configurer = new UserMapperConfigurer(toEntityConverter, toDtoConverter);
+
+        modelMapper = new ModelMapper();
+        modelMapper.addConverter(toDtoConverter);
+        modelMapper.addConverter(toEntityConverter);
+        configurer.configure(modelMapper);
     }
 
     @Test
-    @DisplayName("Should map User entity to UserDTO and exclude sensitive fields like password and groups")
-    void shouldMapUserEntityToUserDtoWithoutSensitiveFields() {
+    @DisplayName("Should map User entity to UserDTO excluding sensitive fields")
+    void shouldMapUserToUserDTO() {
         User user = new User();
         user.setId(UUID.randomUUID());
         user.setName("Test");
         user.setEmail("test@example.com");
         user.setTelefone("123");
-        user.setGroups(new HashSet<>());
 
-        UserDTO dto = userMapper.toDTO(user);
+        UserDTO dto = modelMapper.map(user, UserDTO.class);
 
-        assertEquals(user.getName(), dto.getName());
-        assertEquals(user.getEmail(), dto.getEmail());
-        assertEquals(user.getTelefone(), dto.getTelefone());
+        assertEquals("Test", dto.getName());
+        assertEquals("test@example.com", dto.getEmail());
+        assertEquals("123", dto.getTelefone());
         assertNull(dto.getPassword());
         assertNull(dto.getOldPassword());
         assertNull(dto.getGroupIds());
     }
 
     @Test
-    @DisplayName("Should update only non-null fields from UserDTO to User entity")
-    void shouldUpdateOnlyNonNullFieldsFromDtoToEntity() {
+    @DisplayName("Should map UserDTO to User and convert group IDs to Group entities")
+    void shouldMapUserDTOToUser() {
+        UUID groupId = UUID.randomUUID();
         UserDTO dto = new UserDTO();
-        dto.setName("Updated Name");
-        dto.setEmail(null);
+        dto.setName("Test");
+        dto.setEmail("test@example.com");
+        dto.setGroupIds(Set.of(groupId));
 
-        User user = new User();
-        user.setName("Old Name");
-        user.setEmail("old@example.com");
+        Group group = new Group();
+        group.setId(groupId);
+        group.setName("Test Group");
+        when(groupRepository.findAllById(Set.of(groupId))).thenReturn(List.of(group));
 
-        userMapper.updateEntityFromDTO(dto, user);
+        User entity = modelMapper.map(dto, User.class);
 
-        assertEquals("Updated Name", user.getName());
-        assertEquals("old@example.com", user.getEmail());
-    }
-
-    @Test
-    @DisplayName("Should convert paginated User entities to paginated UserDTOs")
-    void shouldConvertUserPageToDtoPage() {
-        User user1 = new User();
-        user1.setName("User1");
-
-        Page<User> page = new PageImpl<>(List.of(user1));
-        Page<UserDTO> dtoPage = userMapper.toDTOPage(page);
-
-        assertEquals(1, dtoPage.getTotalElements());
-        assertEquals("User1", dtoPage.getContent().getFirst().getName());
+        assertEquals("Test", entity.getName());
+        assertEquals("test@example.com", entity.getEmail());
+        assertNotNull(entity.getGroups());
+        assertEquals(1, entity.getGroups().size());
+        assertTrue(entity.getGroups().stream().anyMatch(g -> g.getId().equals(groupId)));
     }
 
     @Test
     @DisplayName("Should return empty groups when groupIds is null or empty")
-    void shouldReturnEmptyGroupsWhenGroupIdsIsNullOrEmpty() {
+    void shouldHandleEmptyGroupIds() {
         UserDTO dtoWithNull = new UserDTO();
         dtoWithNull.setGroupIds(null);
 
         UserDTO dtoWithEmpty = new UserDTO();
         dtoWithEmpty.setGroupIds(Collections.emptySet());
 
-        User userFromNull = userMapper.toEntity(dtoWithNull);
-        User userFromEmpty = userMapper.toEntity(dtoWithEmpty);
+        User userFromNull = modelMapper.map(dtoWithNull, User.class);
+        User userFromEmpty = modelMapper.map(dtoWithEmpty, User.class);
 
         assertNotNull(userFromNull.getGroups());
         assertTrue(userFromNull.getGroups().isEmpty());
@@ -102,6 +104,6 @@ class UserMapperTest {
         assertNotNull(userFromEmpty.getGroups());
         assertTrue(userFromEmpty.getGroups().isEmpty());
 
-        verify(groupRepository, never()).findAll((Example<Group>) any());
+        verify(groupRepository, never()).findAllById(any());
     }
 }
