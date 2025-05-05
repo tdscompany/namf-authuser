@@ -1,4 +1,4 @@
-package com.moura.authorization.validation;
+package com.moura.authorization.users.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;

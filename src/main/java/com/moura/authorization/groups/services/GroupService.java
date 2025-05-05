@@ -1,8 +1,12 @@
 package com.moura.authorization.groups.services;
 
+import com.moura.authorization.groups.entities.Group;
+
 import java.util.Set;
 import java.util.UUID;
 
+
 public interface GroupService {
-    boolean validateGroupIds(Set<UUID> groupsIds);
+    Group create(Group group);
+    void validateGroupIds(Set<UUID> groupIds);
 }

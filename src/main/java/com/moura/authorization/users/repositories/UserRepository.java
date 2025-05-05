@@ -49,4 +49,6 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
       WHERE u.id = :id AND u.organizationId = :currentTenant
     """)
     Optional<User> findByIdAndTenant(UUID id, UUID currentTenant);
+
+    boolean existsByEmailAndIdNot(String email, UUID id);
 }

@@ -1,6 +1,5 @@
-package com.moura.authorization.validation;
+package com.moura.authorization.users.validation;
 
-import com.moura.authorization.utils.MessageUtils;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 

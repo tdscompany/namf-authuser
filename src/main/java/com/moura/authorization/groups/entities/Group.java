@@ -3,7 +3,6 @@ package com.moura.authorization.groups.entities;
 import com.moura.authorization.users.entities.User;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -14,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Entity
 @Data
@@ -25,11 +25,15 @@ public class Group {
     @GeneratedValue(generator = "uuid7")
     private UUID id;
 
-    @Column
+
+    @Column(nullable = false)
+    private String color;
+
+    @Column(nullable = false)
     private UUID organizationId;
 
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String name;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -66,6 +70,10 @@ public class Group {
         if (o == null || getClass() != o.getClass()) return false;
         Group group = (Group) o;
         return Objects.equals(id, group.id);
+    }
+
+    public Set<UUID> getPermissionsIds() {
+        return permissions.stream().map(Permission::getId).collect(Collectors.toSet());
     }
 
     @Override

@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
@@ -81,6 +82,7 @@ public class User implements UserDetails {
     @Version
     private Long version;
 
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -106,6 +108,10 @@ public class User implements UserDetails {
         return credentials.stream().filter(Credentials::isActive).findFirst()
                 .map(Credentials::getPassword)
                 .orElseThrow(() -> new NoSuchElementException(MessageUtils.get("error.not_active_credentials")));
+    }
+
+    public Set<UUID> getGroupIds() {
+        return groups.stream().map(Group::getId).collect(Collectors.toSet());
     }
 
     @Override

@@ -1,12 +1,16 @@
 package com.moura.authorization.users.services.impl;
 
 import com.moura.authorization.context.TenantContext;
+import com.moura.authorization.exceptions.AlreadyExistsException;
+import com.moura.authorization.exceptions.NotFoundException;
+import com.moura.authorization.groups.services.GroupService;
 import com.moura.authorization.users.enums.UserStatus;
 import com.moura.authorization.users.entities.Credentials;
 import com.moura.authorization.users.entities.User;
 import com.moura.authorization.users.repositories.UserRepository;
 import com.moura.authorization.users.services.CredentialsService;
 import com.moura.authorization.users.services.UserService;
+import com.moura.authorization.utils.MessageUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -26,37 +30,37 @@ public class UserServiceImpl implements UserService {
 
     private final CredentialsService credentialsService;
 
+    private final GroupService groupService;
+
     private final PasswordEncoder passwordEncoder;
 
 
-    public UserServiceImpl(UserRepository userRepository, CredentialsService credentialsService, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, CredentialsService credentialsService, GroupService groupService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.credentialsService = credentialsService;
+        this.groupService = groupService;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
-    public Optional<User> findById(UUID userId) {
-        var tenantId = TenantContext.getCurrentTenant();
-        return userRepository.findByIdAndTenant(userId, tenantId);
-    }
-
-    @Override
-    public boolean existsByEmail(String email) {
-        return userRepository.existsByEmail(email);
+    public User findById(UUID userId) {
+        return userRepository.findByIdAndTenant(userId, TenantContext.getCurrentTenant())
+                .orElseThrow(() -> new NotFoundException(MessageUtils.get("error.user_not_found")));
     }
 
     @Transactional
     @Override
     public User create(User entity) {
+        validateEntity(entity);
+
         entity.setOrganizationId(TenantContext.getCurrentTenant());
         entity.setUserStatus(UserStatus.ACTIVE);
 
         var user = userRepository.save(entity);
 
         credentialsService.create(new Credentials(
-                passwordEncoder.encode(entity.getPasswordNotEncoded()), user
-        ));
+                passwordEncoder.encode(entity.getPasswordNotEncoded()), user)
+        );
 
         return user;
     }
@@ -94,6 +98,20 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     public User update(User entity) {
+        validateEntity(entity);
         return userRepository.save(entity);
+    }
+
+    private void validateEntity(User entity) {
+        validateEmail(entity.getEmail(), entity.getId());
+        groupService.validateGroupIds(entity.getGroupIds());
+    }
+
+    private void validateEmail(String email, UUID currentUserId) {
+        boolean exists = (currentUserId == null)
+                ? userRepository.existsByEmail(email)
+                : userRepository.existsByEmailAndIdNot(email, currentUserId);
+
+        if (exists) throw new AlreadyExistsException(MessageUtils.get("conflict.email_already_exists"));
     }
 }

@@ -14,4 +14,11 @@ import java.util.UUID;
 public interface GroupRepository extends JpaRepository<Group, UUID>, JpaSpecificationExecutor<Group> {
     @Query("SELECT g.id FROM Group g WHERE g.id IN :ids AND g.organizationId = :tenantId")
     Set<UUID> findExistingIdsByTenant(@Param("ids") Set<UUID> ids, @Param("tenantId") UUID tenantId);
+
+    @Query("""
+      SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END
+      FROM Group u
+      WHERE u.name = :name AND u.organizationId = :tenantId
+    """)
+    boolean existsByName(String name, @Param("tenantId") UUID tenantId);
 }

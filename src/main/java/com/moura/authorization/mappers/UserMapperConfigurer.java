@@ -20,7 +20,6 @@ public class UserMapperConfigurer implements TypeMapConfigurer<UserDTO, User> {
         this.groupToGroupDTOConverter = groupToGroupDTOConverter;
     }
 
-
     @Override
     public void configure(ModelMapper modelMapper) {
         modelMapper.typeMap(UserDTO.class, User.class)
