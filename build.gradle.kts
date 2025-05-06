@@ -1,9 +1,11 @@
 plugins {
     java
-    war
-    id("org.springframework.boot") version "3.4.4"
+    id("org.springframework.boot") version "3.4.5"
     id("io.spring.dependency-management") version "1.1.7"
     id("jacoco")
+    id("org.owasp.dependencycheck") version "12.1.1"
+    id("com.google.cloud.tools.jib") version "3.4.5"
+    id("org.sonarqube") version "6.1.0.5360"
 }
 
 group = "com.moura"
@@ -25,6 +27,8 @@ repositories {
     mavenCentral()
 }
 
+
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-security")
@@ -37,19 +41,38 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
     annotationProcessor("org.projectlombok:lombok")
     implementation("org.modelmapper:modelmapper:3.2.2")
-    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-}
-
-tasks.test {
-    testLogging {
-        events("passed", "skipped", "failed")
-        showStandardStreams = true
-    }
+    testRuntimeOnly("com.h2database:h2")
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "tdscompany_namf-authuser_343abc31-fd3d-4a03-a5bc-5c0292a80844")
+        property("sonar.projectName", "namf-authuser")
+    }
+}
+tasks.sonar {
+    dependsOn(tasks.dependencyCheckAnalyze, tasks.jacocoTestReport)
+}
+
+jacoco {
+    toolVersion = "0.8.13"
+}
+
+tasks.dependencyCheckAnalyze {
+    config.formats = listOf("JSON", "HTML")
+    config.nvd.apiKey = project.property("nvd.apiKey") as String
+}
+
+tasks.jacocoTestReport {
+    reports {
+        xml.required.set(true)
+    }
+    dependsOn(tasks.test)
 }

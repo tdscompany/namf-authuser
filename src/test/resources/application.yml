@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1
+    username: sa
+    password: sa
+jwt:
+  key:
+    value: 6f62df94b511e04fbdee6340270aa83b747f348b21a232c864c3e9b51e714fb9
+  expiration:
+    access: 3600000
+    refresh: 7
