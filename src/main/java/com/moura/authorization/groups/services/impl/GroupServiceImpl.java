@@ -7,7 +7,11 @@ import com.moura.authorization.groups.entities.Group;
 import com.moura.authorization.groups.repositories.GroupRepository;
 import com.moura.authorization.groups.services.GroupService;
 import com.moura.authorization.groups.services.PermissionService;
+import com.moura.authorization.users.entities.User;
 import com.moura.authorization.utils.MessageUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
@@ -40,6 +44,11 @@ public class GroupServiceImpl implements GroupService {
         Set<UUID> existingIds = groupRepository.findExistingIdsByTenant(groupIds, TenantContext.getCurrentTenant());
         if (!groupIds.removeAll(existingIds))
             throw new NotFoundException(MessageUtils.get("error.group_already_exists"));
+    }
+
+    @Override
+    public Page<Group> findAll(Specification<Group> spec, Pageable pageable) {
+        return groupRepository.findAll(spec, pageable);
     }
 
     private void existsByName(String name) {
