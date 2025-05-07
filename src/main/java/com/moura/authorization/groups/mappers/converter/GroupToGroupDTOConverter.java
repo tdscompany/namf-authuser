@@ -11,11 +11,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-public class GroupToGroupDTOConverter implements Converter<Set<Group>, Set<GroupDTO>> {
-    @Override
-    public Set<GroupDTO> convert(MappingContext<Set<Group>, Set<GroupDTO>> context) {
-        if (context.getSource() == null) return Collections.emptySet();
-        return context.getSource().stream()
+public class GroupToGroupDTOConverter {
+
+    public Set<GroupDTO> convert(Set<Group> groups) {
+        if (groups == null || groups.isEmpty()) return Collections.emptySet();
+        return groups.stream()
                 .map(g -> new GroupDTO(g.getId(), g.getName()))
                 .collect(Collectors.toSet());
     }

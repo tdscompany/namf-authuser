@@ -83,6 +83,21 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    @ExceptionHandler(PayloadProcessingException.class)
+    public ResponseEntity<ErrorResponseDTO> handlePayloadProcessingException(PayloadProcessingException e, HttpServletRequest request) {
+
+        ErrorResponseDTO error = ErrorResponseDTO.builder()
+                .timestamp(Instant.now())
+                .error("Internal Server Error")
+                .message(e.getMessage())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+
     @ExceptionHandler(MissingTenantIdException.class)
     public ResponseEntity<ErrorResponseDTO> handleJwtAuthorizationException(MissingTenantIdException e, HttpServletRequest request) {
 

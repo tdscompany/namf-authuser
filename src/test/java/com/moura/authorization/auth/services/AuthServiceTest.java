@@ -3,7 +3,8 @@ package com.moura.authorization.auth.services;
 import com.moura.authorization.auth.dtos.AuthDto;
 import com.moura.authorization.auth.dtos.TokenDto;
 import com.moura.authorization.auth.services.impl.AuthServiceImpl;
-import com.moura.authorization.configs.resolvers.TenantResolver;
+import com.moura.authorization.event.publisher.EventPublisher;
+import com.moura.authorization.organization.resolvers.TenantResolver;
 import com.moura.authorization.configs.security.providers.JwtProvider;
 import com.moura.authorization.groups.entities.Permission;
 import com.moura.authorization.groups.repositories.PermissionRepository;
@@ -36,6 +37,9 @@ class AuthServiceTest {
 
     @Mock
     private JwtProvider jwtProvider;
+
+    @Mock
+    private EventPublisher eventPublisher;
 
     @Mock
     private TenantResolver tenantResolver;

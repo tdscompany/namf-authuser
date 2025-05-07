@@ -1,23 +1,20 @@
-package com.moura.authorization.mappers;
+package com.moura.authorization.users.mappers;
 
 import com.moura.authorization.configs.TypeMapConfigurer;
 import com.moura.authorization.groups.mappers.converter.GroupIdToGroupConverter;
 import com.moura.authorization.groups.mappers.converter.GroupToGroupDTOConverter;
 import com.moura.authorization.users.dtos.UserDTO;
 import com.moura.authorization.users.entities.User;
+import com.moura.authorization.users.mappers.converter.UserToUserDTOConverter;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
-
 @Component
 public class UserMapperConfigurer implements TypeMapConfigurer<UserDTO, User> {
 
     private final GroupIdToGroupConverter groupIdToGroupConverter;
-    private final GroupToGroupDTOConverter groupToGroupDTOConverter;
 
-    public UserMapperConfigurer(GroupIdToGroupConverter groupIdToGroupConverter,
-                                GroupToGroupDTOConverter groupToGroupDTOConverter) {
+    public UserMapperConfigurer(GroupIdToGroupConverter groupIdToGroupConverter) {
         this.groupIdToGroupConverter = groupIdToGroupConverter;
-        this.groupToGroupDTOConverter = groupToGroupDTOConverter;
     }
 
     @Override
@@ -36,14 +33,5 @@ public class UserMapperConfigurer implements TypeMapConfigurer<UserDTO, User> {
                     mapper.skip(User::setPasswordNotEncoded);
                     mapper.skip(User::setVersion);
                 });
-
-        modelMapper.typeMap(User.class, UserDTO.class)
-                .addMappings(mapper -> {
-                    mapper.skip(UserDTO::setPassword);
-                    mapper.skip(UserDTO::setOldPassword);
-                    mapper.using(groupToGroupDTOConverter).map(User::getGroups, UserDTO::setGroups);
-                    mapper.skip(UserDTO::setGroupIds);
-                });
     }
-
 }

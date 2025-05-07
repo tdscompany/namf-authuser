@@ -111,6 +111,7 @@ public class User implements UserDetails {
     }
 
     public Set<UUID> getGroupIds() {
+        if (groups == null) return Collections.emptySet();
         return groups.stream().map(Group::getId).collect(Collectors.toSet());
     }
 

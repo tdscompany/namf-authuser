@@ -60,4 +60,6 @@ public class UserDTO {
 
     @JsonView({UserView.RegistrationPost.class, UserView.UserPut.class})
     private String description;
+
+    private LocalDateTime lastAccess;
 }
