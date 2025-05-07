@@ -65,6 +65,13 @@ public class Group {
     @Version
     private Long version;
 
+    public Group() {
+    }
+    public Group(UUID uuid, String admin) {
+        this.id = uuid;
+        this.name = admin;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

@@ -3,17 +3,23 @@ package com.moura.authorization.groups.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.moura.authorization.groups.dtos.GroupDTO;
+import com.moura.authorization.groups.dtos.GroupFilterDTO;
 import com.moura.authorization.groups.entities.Group;
+import com.moura.authorization.groups.repositories.specification.GroupSpecification;
 import com.moura.authorization.groups.services.GroupService;
+import com.moura.authorization.users.dtos.UserDTO;
+import com.moura.authorization.users.dtos.UserFilterDTO;
+import com.moura.authorization.users.repositories.specification.UserSpecification;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/v1/groups")
@@ -40,5 +46,17 @@ public class GroupController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(modelMapper.map(created, GroupDTO.class));
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAuthority('user:read')")
+    public ResponseEntity<Page<UserDTO>> getAllGroups(
+            @ModelAttribute GroupFilterDTO filter,
+            @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Page<UserDTO> result = groupService.findAll(GroupSpecification.of(filter), pageable)
+                .map(user -> modelMapper.map(user, UserDTO.class));
+
+        return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 }

@@ -46,6 +46,14 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(modelMapper.map(created, UserDTO.class));
     }
+    @GetMapping("/{userId}")
+    @PreAuthorize("hasAuthority('user:read')")
+    public ResponseEntity<Object> getById(
+            @PathVariable UUID userId
+    ) {
+        var user = userService.findById(userId);
+        return ResponseEntity.status(HttpStatus.OK).body(modelMapper.map(user, UserDTO.class));
+    }
 
     @GetMapping
     @PreAuthorize("hasAuthority('user:read')")

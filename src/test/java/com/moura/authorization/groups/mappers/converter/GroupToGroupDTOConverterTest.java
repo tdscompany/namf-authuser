@@ -4,15 +4,19 @@ import com.moura.authorization.groups.dtos.GroupDTO;
 import com.moura.authorization.groups.entities.Group;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.spi.MappingContext;
 
 import java.util.Set;
 import java.util.UUID;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class GroupToGroupDTOConverterTest {
 
     private GroupToGroupDTOConverter converter;
@@ -23,30 +27,23 @@ class GroupToGroupDTOConverterTest {
     }
 
     @Test
-    void shouldConvertGroupsToGroupDTOs() {
-        UUID groupId = UUID.randomUUID();
+    void shouldConvertGroupSetToGroupDTOSet() {
         Group group = new Group();
-        group.setId(groupId);
-        group.setName("Finance");
+        group.setId(UUID.randomUUID());
+        group.setName("Admin");
+        Group group2 = new Group();
+        group2.setId(UUID.randomUUID());
+        group2.setName("User");
 
-        MappingContext<Set<Group>, Set<GroupDTO>> context = mock(MappingContext.class);
-        when(context.getSource()).thenReturn(Set.of(group));
+        Set<Group> groups = Set.of(group, group2);
+        Set<GroupDTO> result = converter.convert(groups);
 
-        Set<GroupDTO> result = converter.convert(context);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertTrue(result.stream().anyMatch(dto -> dto.getId().equals(groupId) && dto.getName().equals("Finance")));
+        assertThat(result).hasSize(2);
+        assertThat(result).extracting(GroupDTO::getName).containsExactlyInAnyOrder("Admin", "User");
     }
 
     @Test
-    void shouldReturnEmptySetWhenSourceIsNull() {
-        MappingContext<Set<Group>, Set<GroupDTO>> context = mock(MappingContext.class);
-        when(context.getSource()).thenReturn(null);
-
-        Set<GroupDTO> result = converter.convert(context);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+    void shouldReturnEmptySetWhenNull() {
+        assertThat(converter.convert(null)).isEmpty();
     }
 }
