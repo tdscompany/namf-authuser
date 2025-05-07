@@ -8,8 +8,6 @@ import com.moura.authorization.groups.entities.Group;
 import com.moura.authorization.groups.repositories.specification.GroupSpecification;
 import com.moura.authorization.groups.services.GroupService;
 import com.moura.authorization.users.dtos.UserDTO;
-import com.moura.authorization.users.dtos.UserFilterDTO;
-import com.moura.authorization.users.repositories.specification.UserSpecification;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/v1/groups")
@@ -38,7 +38,7 @@ public class GroupController {
 
     @PostMapping()
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<Object> createGroup(
+    public ResponseEntity<GroupDTO> createGroup(
             @RequestBody @Validated(GroupDTO.GroupView.RegistrationPost.class)
             @JsonView(GroupDTO.GroupView.RegistrationPost.class) GroupDTO groupDto) {
 
@@ -58,5 +58,14 @@ public class GroupController {
                 .map(user -> modelMapper.map(user, UserDTO.class));
 
         return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    @DeleteMapping("/{groupId}")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<Void> inactive(
+            @PathVariable UUID groupId
+    ) {
+        groupService.inactivate(groupId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
