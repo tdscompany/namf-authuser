@@ -1,5 +1,6 @@
 package com.moura.authorization.groups.services.impl;
 
+import com.moura.authorization.exceptions.EmptyCollectionException;
 import com.moura.authorization.exceptions.NotFoundException;
 import com.moura.authorization.groups.repositories.PermissionRepository;
 import com.moura.authorization.groups.services.PermissionService;
@@ -20,8 +21,7 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public void validatePermissionIds(Set<UUID> permissionsIds) {
-        if (permissionsIds == null || permissionsIds.isEmpty())
-            throw new NotFoundException(MessageUtils.get("error.permission_not_found"));
+        if (permissionsIds == null || permissionsIds.isEmpty()) throw new EmptyCollectionException(MessageUtils.get("error.permissionIds_empty"));
 
         Set<UUID> existingIds = permissionRepository.findExistingIds(permissionsIds);
         if (!permissionsIds.removeAll(existingIds))

@@ -62,6 +62,9 @@ public class Group {
     @Column(updatable = false)
     private LocalDateTime updatedAt;
 
+    @ManyToMany(mappedBy = "groups", fetch = FetchType.LAZY)
+    private Set<User> users;
+
     @Version
     private Long version;
 

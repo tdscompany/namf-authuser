@@ -22,6 +22,7 @@ public class GroupIdToGroupConverter implements Converter<Set<UUID>, Set<Group>>
 
     @Override
     public Set<Group> convert(MappingContext<Set<UUID>, Set<Group>> context) {
+        System.out.println("aaaaaaaaaaaaaaainw");
         Set<UUID> groupIds = context.getSource();
         if (groupIds == null || groupIds.isEmpty()) {
             return Collections.emptySet();

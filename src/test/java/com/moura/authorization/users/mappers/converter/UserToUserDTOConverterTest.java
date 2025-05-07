@@ -8,6 +8,7 @@ import com.moura.authorization.groups.dtos.GroupDTO;
 import com.moura.authorization.groups.entities.Group;
 import com.moura.authorization.groups.mappers.converter.GroupToGroupDTOConverter;
 import com.moura.authorization.users.dtos.UserDTO;
+import com.moura.authorization.users.dtos.UserOutputDTO;
 import com.moura.authorization.users.entities.User;
 import com.moura.authorization.users.enums.UserStatus;
 import org.junit.jupiter.api.Test;
@@ -63,20 +64,20 @@ class UserToUserDTOConverterTest {
 
         when(groupToGroupDTOConverter.convert(any())).thenReturn(groupDTOs);
 
-        MappingContext<User, UserDTO> context = mock(MappingContext.class);
+        MappingContext<User, UserOutputDTO> context = mock(MappingContext.class);
         when(context.getSource()).thenReturn(user);
 
-        UserDTO dto = converter.convert(context);
+        UserOutputDTO dto = converter.convert(context);
 
-        assertEquals(user.getId(), dto.getId());
-        assertEquals(user.getEmail(), dto.getEmail());
-        assertEquals(user.getName(), dto.getName());
-        assertEquals(user.getTelefone(), dto.getTelefone());
-        assertEquals(user.getDescription(), dto.getDescription());
-        assertEquals(user.getUserStatus(), dto.getUserStatus());
-        assertEquals(user.getCreatedAt(), dto.getCreatedAt());
-        assertEquals(groupDTOs, dto.getGroups());
-        assertEquals(lastAccess, dto.getLastAccess());
+        assertEquals(user.getId(), dto.id());
+        assertEquals(user.getEmail(), dto.email());
+        assertEquals(user.getName(), dto.name());
+        assertEquals(user.getTelefone(), dto.telefone());
+        assertEquals(user.getDescription(), dto.description());
+        assertEquals(user.getUserStatus(), dto.userStatus());
+        assertEquals(user.getCreatedAt(), dto.createdAt());
+        assertEquals(groupDTOs, dto.groups());
+        assertEquals(lastAccess, dto.lastAccess());
     }
 
     @Test
@@ -91,11 +92,11 @@ class UserToUserDTOConverterTest {
 
         when(groupToGroupDTOConverter.convert(any())).thenReturn(Collections.emptySet());
 
-        MappingContext<User, UserDTO> context = mock(MappingContext.class);
+        MappingContext<User, UserOutputDTO> context = mock(MappingContext.class);
         when(context.getSource()).thenReturn(user);
 
-        UserDTO dto = converter.convert(context);
+        UserOutputDTO dto = converter.convert(context);
 
-        assertNull(dto.getLastAccess());
+        assertNull(dto.lastAccess());
     }
 }

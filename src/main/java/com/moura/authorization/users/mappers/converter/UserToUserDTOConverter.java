@@ -6,6 +6,7 @@ import com.moura.authorization.event.enums.EventType;
 import com.moura.authorization.event.repositories.EventRepository;
 import com.moura.authorization.groups.mappers.converter.GroupToGroupDTOConverter;
 import com.moura.authorization.users.dtos.UserDTO;
+import com.moura.authorization.users.dtos.UserOutputDTO;
 import com.moura.authorization.users.entities.User;
 import org.modelmapper.Converter;
 import org.modelmapper.spi.MappingContext;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Component
-public class UserToUserDTOConverter implements Converter<User, UserDTO> {
+public class UserToUserDTOConverter implements Converter<User, UserOutputDTO> {
 
     private final EventRepository eventRepository;
     private final GroupToGroupDTOConverter groupToGroupDTOConverter;
@@ -27,21 +28,20 @@ public class UserToUserDTOConverter implements Converter<User, UserDTO> {
     }
 
     @Override
-    public UserDTO convert(MappingContext<User, UserDTO> context) {
+    public UserOutputDTO convert(MappingContext<User, UserOutputDTO> context) {
         User user = context.getSource();
-        UserDTO dto = new UserDTO();
 
-        dto.setId(user.getId());
-        dto.setEmail(user.getEmail());
-        dto.setName(user.getName());
-        dto.setTelefone(user.getTelefone());
-        dto.setDescription(user.getDescription());
-        dto.setUserStatus(user.getUserStatus());
-        dto.setCreatedAt(user.getCreatedAt());
-        dto.setGroups(groupToGroupDTOConverter.convert(user.getGroups()));
-        dto.setLastAccess(resolveLastAccess(user.getId()));
-
-        return dto;
+        return UserOutputDTO.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .name(user.getName())
+                .telefone(user.getTelefone())
+                .description(user.getDescription())
+                .userStatus(user.getUserStatus())
+                .createdAt(user.getCreatedAt())
+                .groups(groupToGroupDTOConverter.convert(user.getGroups()))
+                .lastAccess(resolveLastAccess(user.getId()))
+                .build();
     }
 
     private LocalDateTime resolveLastAccess(UUID userId) {

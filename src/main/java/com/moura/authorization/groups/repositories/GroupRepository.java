@@ -14,8 +14,8 @@ import java.util.UUID;
 
 @Repository
 public interface GroupRepository extends JpaRepository<Group, UUID>, JpaSpecificationExecutor<Group> {
-    @Query("SELECT g.id FROM Group g WHERE g.id IN :ids AND g.organizationId = :tenantId")
-    Set<UUID> findExistingIdsByTenant(@Param("ids") Set<UUID> ids, @Param("tenantId") UUID tenantId);
+    @Query("SELECT g FROM Group g WHERE g.id IN :ids AND g.organizationId = :tenantId")
+    Set<Group> findExistingIdsByTenant(@Param("ids") Set<UUID> ids, @Param("tenantId") UUID tenantId);
 
     @Query("""
       SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END
@@ -33,4 +33,17 @@ public interface GroupRepository extends JpaRepository<Group, UUID>, JpaSpecific
     @Modifying
     @Query(value = "DELETE FROM user_groups WHERE group_id = :groupId", nativeQuery = true)
     void deleteGroupAssociations(@Param("groupId") UUID groupId);
+
+    @Query("""
+      SELECT CASE WHEN COUNT(g) > 0 THEN true ELSE false END
+      FROM Group g
+      WHERE g.name = :name AND g.id <> :currentGroupId AND g.organizationId = :currentTenant
+    """)
+    boolean existsByNameAndIdNot(@Param("name") String name, @Param("currentGroupId") UUID currentGroupId, @Param("currentTenant") UUID currentTenant);
+
+    @Query("""
+      SELECT g FROM Group g
+      WHERE g.id IN :groupIds AND g.organizationId = :currentTenant
+    """)
+    Set<Group> findAllByIdAndTenant(Set<UUID> groupIds, UUID currentTenant);
 }

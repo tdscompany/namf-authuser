@@ -80,7 +80,21 @@ public class GlobalExceptionHandler {
                 .path(request.getRequestURI())
                 .build();
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(EmptyCollectionException.class)
+    public ResponseEntity<ErrorResponseDTO> handleEmptyCollectionException(EmptyCollectionException e, HttpServletRequest request) {
+
+        ErrorResponseDTO error = ErrorResponseDTO.builder()
+                .timestamp(Instant.now())
+                .error("Conflict")
+                .message(e.getMessage())
+                .status(HttpStatus.CONFLICT.value())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
     @ExceptionHandler(PayloadProcessingException.class)

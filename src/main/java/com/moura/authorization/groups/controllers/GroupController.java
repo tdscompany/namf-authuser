@@ -71,14 +71,14 @@ public class GroupController {
 
     @PutMapping("/{groupId}")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<UserDTO> update(
+    public ResponseEntity<GroupDTO> update(
             @PathVariable UUID groupId,
-            @RequestBody @JsonView(UserDTO.UserView.UserPut.class) UserDTO userDto
+            @RequestBody @JsonView(GroupDTO.GroupView.GroupPut.class) GroupDTO groupDto
     ) {
-        var group = groupService.findById(groupId);
-        modelMapper.map(userDto,group);
-        var updated = groupService.update(group);
+        Group group = groupService.findById(groupId);
+        modelMapper.map(groupDto,group);
+        Group updated = groupService.update(group);
 
-        return ResponseEntity.status(HttpStatus.OK).body(modelMapper.map(updated, UserDTO.class));
+        return ResponseEntity.status(HttpStatus.OK).body(modelMapper.map(updated, GroupDTO.class));
     }
 }

@@ -21,8 +21,6 @@ public class CredentialsServiceImpl implements CredentialsService {
             throw new IllegalArgumentException("Credentials cannot be null");
         }
 
-        credentialsRepository.save(credentials);
-
-        return null;
+        return credentialsRepository.save(credentials);
     }
 }

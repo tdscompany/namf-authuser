@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Set;
 import java.util.UUID;
@@ -51,13 +52,15 @@ public class GroupServiceImpl implements GroupService {
         return group;
     }
 
-    public void validateGroupIds(Set<UUID> groupIds) {
-        if (groupIds == null || groupIds.isEmpty())
-            throw new NotFoundException(MessageUtils.get("error.groupIds_not_found"));
+    public Set<Group> validateGroupIds(Set<UUID> groupIds) {
+        if (CollectionUtils.isEmpty(groupIds)) return Set.of();
 
-        Set<UUID> existingIds = groupRepository.findExistingIdsByTenant(groupIds, TenantContext.getCurrentTenant());
-        if (!groupIds.removeAll(existingIds))
-            throw new NotFoundException(MessageUtils.get("error.group_already_exists"));
+        Set<Group> existingGroups = groupRepository.findExistingIdsByTenant(groupIds, TenantContext.getCurrentTenant());
+        if (existingGroups.size() != groupIds.size()) {
+            throw new NotFoundException(MessageUtils.get("error.groupIds_not_found"));
+        }
+
+        return existingGroups;
     }
 
     @Override
@@ -73,7 +76,8 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public Group update(Group group) {
-        return null;
+        validateEntity(group);
+        return groupRepository.save(group);
     }
 
     @Transactional
@@ -88,13 +92,16 @@ public class GroupServiceImpl implements GroupService {
                 .build()
         );
     }
-    private void existsByName(String name) {
-        var exists = groupRepository.existsByName(name,TenantContext.getCurrentTenant());
+    private void existsByName(String name, UUID currentGroupId) {
+        boolean exists = (currentGroupId == null)
+                ? groupRepository.existsByName(name,TenantContext.getCurrentTenant())
+                : groupRepository.existsByNameAndIdNot(name, currentGroupId,TenantContext.getCurrentTenant());
+
         if (exists) throw new AlreadyExistsException(MessageUtils.get("conflict.group_already_exists"));
     }
 
     private void validateEntity(Group entity) {
-        existsByName(entity.getName());
+        existsByName(entity.getName(), entity.getId());
         permissionService.validatePermissionIds(entity.getPermissionsIds());
     }
 }

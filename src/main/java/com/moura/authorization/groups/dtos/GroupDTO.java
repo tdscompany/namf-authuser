@@ -28,15 +28,15 @@ public class GroupDTO {
 
     private UUID id;
     @NotBlank(groups = {GroupView.RegistrationPost.class})
-    @JsonView({GroupView.RegistrationPost.class})
+    @JsonView({GroupView.RegistrationPost.class,GroupView.GroupPut.class})
     private String name;
 
     @NotBlank(groups = {GroupView.RegistrationPost.class})
-    @JsonView({GroupView.RegistrationPost.class})
+    @JsonView({GroupView.RegistrationPost.class,GroupView.GroupPut.class})
     private String color;
 
     @NotEmpty(groups = {GroupView.RegistrationPost.class})
-    @JsonView({GroupView.RegistrationPost.class})
+    @JsonView({GroupView.RegistrationPost.class,GroupView.GroupPut.class})
     private Set<UUID> permissionIds;
 
     private Set<Permission> permissions;
