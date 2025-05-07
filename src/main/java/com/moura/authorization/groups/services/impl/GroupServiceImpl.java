@@ -71,6 +71,11 @@ public class GroupServiceImpl implements GroupService {
                 .orElseThrow(() -> new NotFoundException(MessageUtils.get("error.group_not_found")));
     }
 
+    @Override
+    public Group update(Group group) {
+        return null;
+    }
+
     @Transactional
     @Override
     public void inactivate(UUID groupId) {

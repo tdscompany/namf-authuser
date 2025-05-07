@@ -50,12 +50,12 @@ public class GroupController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('user:read')")
-    public ResponseEntity<Page<UserDTO>> getAllGroups(
+    public ResponseEntity<Page<GroupDTO>> getAllGroups(
             @ModelAttribute GroupFilterDTO filter,
             @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<UserDTO> result = groupService.findAll(GroupSpecification.of(filter), pageable)
-                .map(user -> modelMapper.map(user, UserDTO.class));
+        Page<GroupDTO> result = groupService.findAll(GroupSpecification.of(filter), pageable)
+                .map(group -> modelMapper.map(group, GroupDTO.class));
 
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
@@ -67,5 +67,18 @@ public class GroupController {
     ) {
         groupService.inactivate(groupId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PutMapping("/{groupId}")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<UserDTO> update(
+            @PathVariable UUID groupId,
+            @RequestBody @JsonView(UserDTO.UserView.UserPut.class) UserDTO userDto
+    ) {
+        var group = groupService.findById(groupId);
+        modelMapper.map(userDto,group);
+        var updated = groupService.update(group);
+
+        return ResponseEntity.status(HttpStatus.OK).body(modelMapper.map(updated, UserDTO.class));
     }
 }

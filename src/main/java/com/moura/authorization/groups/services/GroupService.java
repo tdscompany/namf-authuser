@@ -15,4 +15,6 @@ public interface GroupService {
     Page<Group> findAll(Specification<Group> spec, Pageable pageable);
     void inactivate(UUID groupId);
     Group findById(UUID groupId);
+
+    Group update(Group group);
 }
