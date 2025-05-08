@@ -34,7 +34,7 @@ public class UserController {
 
     @PostMapping("/register")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<Object> signup(
+    public ResponseEntity<UserDTO> signup(
             @RequestBody @Validated(UserDTO.UserView.RegistrationPost.class)
             @JsonView(UserDTO.UserView.RegistrationPost.class) UserDTO userDto) {
 
@@ -48,7 +48,7 @@ public class UserController {
     }
     @GetMapping("/{userId}")
     @PreAuthorize("hasAuthority('user:read')")
-    public ResponseEntity<Object> getById(
+    public ResponseEntity<UserDTO> getById(
             @PathVariable UUID userId
     ) {
         var user = userService.findById(userId);
@@ -69,7 +69,7 @@ public class UserController {
 
     @DeleteMapping("/{userId}")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<Object> inactive(
+    public ResponseEntity<Void> inactive(
             @PathVariable UUID userId
     ) {
         var user = userService.findById(userId);
@@ -81,7 +81,7 @@ public class UserController {
 
     @PutMapping("/{userId}")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<Object> update(
+    public ResponseEntity<UserDTO> update(
             @PathVariable UUID userId,
             @RequestBody @JsonView(UserDTO.UserView.UserPut.class) UserDTO userDto
     ) {

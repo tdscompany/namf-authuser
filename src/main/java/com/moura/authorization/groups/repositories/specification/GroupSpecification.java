@@ -3,8 +3,7 @@ package com.moura.authorization.groups.repositories.specification;
 import com.moura.authorization.context.TenantContext;
 import com.moura.authorization.groups.dtos.GroupFilterDTO;
 import com.moura.authorization.groups.entities.Group;
-import com.moura.authorization.users.entities.User;
-import com.moura.authorization.users.entities.User_;
+import com.moura.authorization.groups.entities.Group_;
 import com.moura.authorization.utils.MessageUtils;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -32,7 +31,9 @@ public class GroupSpecification  implements Specification<Group> {
         }
 
         List<Predicate> predicates = new ArrayList<>();
-        predicates.add(cb.equal(root.get(User_.ORGANIZATION_ID), tenantId));
+        predicates.add(cb.equal(root.get(Group_.ORGANIZATION_ID), tenantId));
+
+        addLikePredicate(cb, predicates, root.get(Group_.NAME), filter.getName());
 
         return cb.and(predicates.toArray(new Predicate[0]));
     }
