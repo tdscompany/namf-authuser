@@ -3,10 +3,9 @@ package com.moura.authorization.users.services.impl;
 import com.moura.authorization.context.TenantContext;
 import com.moura.authorization.exceptions.AlreadyExistsException;
 import com.moura.authorization.exceptions.NotFoundException;
-import com.moura.authorization.groups.services.GroupService;
-import com.moura.authorization.users.enums.UserStatus;
 import com.moura.authorization.users.entities.Credentials;
 import com.moura.authorization.users.entities.User;
+import com.moura.authorization.users.enums.UserStatus;
 import com.moura.authorization.users.repositories.UserRepository;
 import com.moura.authorization.users.services.CredentialsService;
 import com.moura.authorization.users.services.UserService;
@@ -19,7 +18,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 

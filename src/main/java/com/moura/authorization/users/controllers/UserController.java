@@ -1,6 +1,5 @@
 package com.moura.authorization.users.controllers;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import com.moura.authorization.users.dtos.*;
 import com.moura.authorization.users.entities.User;
 import com.moura.authorization.users.repositories.specification.UserSpecification;
@@ -34,10 +33,10 @@ public class UserController {
     @PostMapping()
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<UserOutputDTO> signup(
-            @RequestBody @Validated RegistrationPostDTO registrationPostDTO) {
+            @RequestBody @Validated UserRegistrationDTO userRegistrationDTO) {
 
-        User user = modelMapper.map(registrationPostDTO, User.class);
-        user.setPasswordNotEncoded(registrationPostDTO.password());
+        User user = modelMapper.map(userRegistrationDTO, User.class);
+        user.setPasswordNotEncoded(userRegistrationDTO.password());
 
         User created = userService.create(user);
 

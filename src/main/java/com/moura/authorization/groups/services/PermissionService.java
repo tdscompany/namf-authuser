@@ -1,5 +1,6 @@
 package com.moura.authorization.groups.services;
 
+import com.moura.authorization.groups.entities.Permission;
 import jakarta.validation.constraints.NotBlank;
 
 import java.util.Set;
@@ -7,5 +8,5 @@ import java.util.UUID;
 
 public interface PermissionService {
 
-    void validatePermissionIds(Set<UUID> permissionsIds);
+    Set<Permission> validatePermissionIds(Set<UUID> permissionsIds);
 }

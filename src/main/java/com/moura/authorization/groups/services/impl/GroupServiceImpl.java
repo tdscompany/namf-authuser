@@ -9,37 +9,38 @@ import com.moura.authorization.groups.event.GroupCreatedPayload;
 import com.moura.authorization.groups.event.GroupDeletedPayload;
 import com.moura.authorization.groups.repositories.GroupRepository;
 import com.moura.authorization.groups.services.GroupService;
-import com.moura.authorization.groups.services.PermissionService;
 import com.moura.authorization.utils.MessageUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class GroupServiceImpl implements GroupService {
 
     private final GroupRepository groupRepository;
 
-    private final PermissionService permissionService;
-
     private final EventPublisher eventPublisher;
 
-    public GroupServiceImpl(GroupRepository groupRepository, PermissionService permissionService, EventPublisher eventPublisher) {
+    public GroupServiceImpl(GroupRepository groupRepository, EventPublisher eventPublisher) {
         this.groupRepository = groupRepository;
-        this.permissionService = permissionService;
         this.eventPublisher = eventPublisher;
     }
 
     @Override
     @Transactional
     public Group create(Group entity) {
-        validateEntity(entity);
+        existsByName(entity.getName(), entity.getId());
 
         entity.setOrganizationId(TenantContext.getCurrentTenant());
         var group = groupRepository.save(entity);
@@ -65,7 +66,9 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public Page<Group> findAll(Specification<Group> spec, Pageable pageable) {
-        return groupRepository.findAll(spec, pageable);
+        Page<Group> page = groupRepository.findAll(spec, pageable);
+        List<Group> enriched = enrichUsersWithPermissions(page.getContent());
+        return new PageImpl<>(enriched, pageable, page.getTotalElements());
     }
 
     @Override
@@ -76,9 +79,22 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public Group update(Group group) {
-        validateEntity(group);
+        existsByName(group.getName(), group.getId());
         return groupRepository.save(group);
     }
+
+    private List<Group> enrichUsersWithPermissions(List<Group> groups) {
+        if (groups.isEmpty()) return groups;
+
+        List<UUID> ids = groups.stream().map(Group::getId).toList();
+        Map<UUID, Group> enrichedMap = groupRepository.findAllWithPermissionsByIds(ids)
+                .stream().collect(Collectors.toMap(Group::getId, Function.identity()));
+
+        return groups.stream()
+                .map(u -> enrichedMap.getOrDefault(u.getId(), u))
+                .toList();
+    }
+
 
     @Transactional
     @Override
@@ -98,10 +114,5 @@ public class GroupServiceImpl implements GroupService {
                 : groupRepository.existsByNameAndIdNot(name, currentGroupId,TenantContext.getCurrentTenant());
 
         if (exists) throw new AlreadyExistsException(MessageUtils.get("conflict.group_already_exists"));
-    }
-
-    private void validateEntity(Group entity) {
-        existsByName(entity.getName(), entity.getId());
-        permissionService.validatePermissionIds(entity.getPermissionsIds());
     }
 }

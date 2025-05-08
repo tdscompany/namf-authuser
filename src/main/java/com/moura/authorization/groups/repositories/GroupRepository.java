@@ -1,16 +1,12 @@
 package com.moura.authorization.groups.repositories;
 
 import com.moura.authorization.groups.entities.Group;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import com.moura.authorization.users.entities.User;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Repository
 public interface GroupRepository extends JpaRepository<Group, UUID>, JpaSpecificationExecutor<Group> {
@@ -41,9 +37,7 @@ public interface GroupRepository extends JpaRepository<Group, UUID>, JpaSpecific
     """)
     boolean existsByNameAndIdNot(@Param("name") String name, @Param("currentGroupId") UUID currentGroupId, @Param("currentTenant") UUID currentTenant);
 
-    @Query("""
-      SELECT g FROM Group g
-      WHERE g.id IN :groupIds AND g.organizationId = :currentTenant
-    """)
-    Set<Group> findAllByIdAndTenant(Set<UUID> groupIds, UUID currentTenant);
+    @EntityGraph(attributePaths = {"permissions"})
+    @Query("SELECT u FROM Group u WHERE u.id IN :ids")
+    List<Group> findAllWithPermissionsByIds(@Param("ids") List<UUID> ids);
 }

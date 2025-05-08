@@ -1,13 +1,9 @@
 package com.moura.authorization.groups.controllers;
 
-
-import com.fasterxml.jackson.annotation.JsonView;
-import com.moura.authorization.groups.dtos.GroupDTO;
-import com.moura.authorization.groups.dtos.GroupFilterDTO;
+import com.moura.authorization.groups.dtos.*;
 import com.moura.authorization.groups.entities.Group;
 import com.moura.authorization.groups.repositories.specification.GroupSpecification;
 import com.moura.authorization.groups.services.GroupService;
-import com.moura.authorization.users.dtos.UserDTO;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +23,6 @@ public class GroupController {
 
     private final GroupService groupService;
 
-
     private final ModelMapper modelMapper;
 
     public GroupController(GroupService groupService, ModelMapper modelMapper) {
@@ -38,26 +33,34 @@ public class GroupController {
 
     @PostMapping()
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<GroupDTO> createGroup(
-            @RequestBody @Validated(GroupDTO.GroupView.RegistrationPost.class)
-            @JsonView(GroupDTO.GroupView.RegistrationPost.class) GroupDTO groupDto) {
+    public ResponseEntity<GroupOutputDTO> createGroup(
+            @RequestBody @Validated GroupRegistrationDTO groupDto) {
 
         Group created = groupService.create(modelMapper.map(groupDto, Group.class));
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(modelMapper.map(created, GroupDTO.class));
+                .body(modelMapper.map(created, GroupOutputDTO.class));
     }
 
     @GetMapping
     @PreAuthorize("hasAuthority('user:read')")
-    public ResponseEntity<Page<GroupDTO>> getAllGroups(
+    public ResponseEntity<Page<GroupOutputDTO>> getAllGroups(
             @ModelAttribute GroupFilterDTO filter,
             @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<GroupDTO> result = groupService.findAll(GroupSpecification.of(filter), pageable)
-                .map(group -> modelMapper.map(group, GroupDTO.class));
+        Page<GroupOutputDTO> result = groupService.findAll(GroupSpecification.of(filter), pageable)
+                .map(group -> modelMapper.map(group, GroupOutputDTO.class));
 
         return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    @GetMapping("/{groupId}")
+    @PreAuthorize("hasAuthority('user:read')")
+    public ResponseEntity<GroupOutputDTO> getById(
+            @PathVariable UUID groupId
+    ) {
+        var group = groupService.findById(groupId);
+        return ResponseEntity.status(HttpStatus.OK).body(modelMapper.map(group, GroupOutputDTO.class));
     }
 
     @DeleteMapping("/{groupId}")
@@ -71,14 +74,14 @@ public class GroupController {
 
     @PutMapping("/{groupId}")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<GroupDTO> update(
+    public ResponseEntity<GroupOutputDTO> update(
             @PathVariable UUID groupId,
-            @RequestBody @JsonView(GroupDTO.GroupView.GroupPut.class) GroupDTO groupDto
+            @RequestBody GroupPutDTO groupDto
     ) {
         Group group = groupService.findById(groupId);
         modelMapper.map(groupDto,group);
         Group updated = groupService.update(group);
 
-        return ResponseEntity.status(HttpStatus.OK).body(modelMapper.map(updated, GroupDTO.class));
+        return ResponseEntity.status(HttpStatus.OK).body(modelMapper.map(updated, GroupOutputDTO.class));
     }
 }

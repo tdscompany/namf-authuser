@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import java.util.Set;
 import java.util.UUID;
 
-public record RegistrationPostDTO(
+public record UserRegistrationDTO(
         @NotBlank
         @EmailConstraint
         String email,
