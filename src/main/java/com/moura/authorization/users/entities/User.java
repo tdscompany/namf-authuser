@@ -34,10 +34,10 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column
     private String telefone;
 
-    @Column()
+    @Column
     private UUID organizationId;
 
     @Column
@@ -46,7 +46,7 @@ public class User implements UserDetails {
     @Transient
     private String passwordNotEncoded;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Credentials> credentials;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -62,12 +62,12 @@ public class User implements UserDetails {
     private UserStatus userStatus;
 
     @CreatedBy
-    @JoinColumn(nullable = false)
+    @JoinColumn
     @ManyToOne(fetch = FetchType.LAZY)
     private User createdBy;
 
     @LastModifiedBy
-    @JoinColumn(nullable = false)
+    @JoinColumn
     @ManyToOne(fetch = FetchType.LAZY)
     private User updatedBy;
 
