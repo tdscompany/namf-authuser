@@ -3,10 +3,9 @@ package com.moura.authorization.users.services.impl;
 import com.moura.authorization.context.TenantContext;
 import com.moura.authorization.exceptions.AlreadyExistsException;
 import com.moura.authorization.exceptions.NotFoundException;
-import com.moura.authorization.groups.services.GroupService;
-import com.moura.authorization.users.enums.UserStatus;
 import com.moura.authorization.users.entities.Credentials;
 import com.moura.authorization.users.entities.User;
+import com.moura.authorization.users.enums.UserStatus;
 import com.moura.authorization.users.repositories.UserRepository;
 import com.moura.authorization.users.services.CredentialsService;
 import com.moura.authorization.users.services.UserService;
@@ -19,7 +18,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -30,15 +31,12 @@ public class UserServiceImpl implements UserService {
 
     private final CredentialsService credentialsService;
 
-    private final GroupService groupService;
-
     private final PasswordEncoder passwordEncoder;
 
 
-    public UserServiceImpl(UserRepository userRepository, CredentialsService credentialsService, GroupService groupService, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, CredentialsService credentialsService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.credentialsService = credentialsService;
-        this.groupService = groupService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -51,7 +49,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public User create(User entity) {
-        validateEntity(entity);
+        validateEmail(entity.getEmail(), entity.getId());
 
         entity.setOrganizationId(TenantContext.getCurrentTenant());
         entity.setUserStatus(UserStatus.ACTIVE);
@@ -68,25 +66,20 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<User> findAll(Specification<User> spec, Pageable pageable) {
         Page<User> page = userRepository.findAll(spec, pageable);
+        List<User> enriched = enrichUsersWithGroups(page.getContent());
+        return new PageImpl<>(enriched, pageable, page.getTotalElements());
+    }
 
-        if (page.isEmpty()) return page;
+    private List<User> enrichUsersWithGroups(List<User> users) {
+        if (users.isEmpty()) return users;
 
-        List<UUID> userIds = page.getContent().stream()
-                .map(User::getId)
+        List<UUID> ids = users.stream().map(User::getId).toList();
+        Map<UUID, User> enrichedMap = userRepository.findAllWithGroupsByIds(ids)
+                .stream().collect(Collectors.toMap(User::getId, Function.identity()));
+
+        return users.stream()
+                .map(u -> enrichedMap.getOrDefault(u.getId(), u))
                 .toList();
-
-        List<User> userWithGroups = userIds.isEmpty()
-                ? Collections.emptyList()
-                : userRepository.findAllWithGroupsByIds(userIds);
-
-        Map<UUID, User> usersEnrichedMap = userWithGroups.stream()
-                .collect(Collectors.toMap(User::getId, Function.identity()));
-
-        List<User> orderedUsers = page.getContent().stream()
-                .map(u -> usersEnrichedMap.getOrDefault(u.getId(), u))
-                .toList();
-
-        return new PageImpl<>(orderedUsers, pageable, page.getTotalElements());
     }
 
     @Transactional
@@ -100,13 +93,8 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     public User update(User entity) {
-        validateEntity(entity);
-        return userRepository.save(entity);
-    }
-
-    private void validateEntity(User entity) {
         validateEmail(entity.getEmail(), entity.getId());
-        groupService.validateGroupIds(entity.getGroupIds());
+        return userRepository.save(entity);
     }
 
     private void validateEmail(String email, UUID currentUserId) {

@@ -37,7 +37,7 @@ public class User implements UserDetails {
     @Column
     private String telefone;
 
-    @Column
+    @Column()
     private UUID organizationId;
 
     @Column
@@ -118,6 +118,11 @@ public class User implements UserDetails {
     @Override
     public String getUsername() {
         return email;
+    }
+
+    @Override
+    public String toString() {
+        return "User{id=" + id + ", email=" + email + "}";
     }
 
 }

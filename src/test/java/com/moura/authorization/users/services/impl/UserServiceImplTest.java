@@ -45,9 +45,6 @@ class UserServiceImplTest {
     private CredentialsService credentialsService;
 
     @Mock
-    private GroupService groupService;
-
-    @Mock
     private PasswordEncoder passwordEncoder;
 
     private User user;
@@ -254,7 +251,6 @@ class UserServiceImplTest {
         savedUser.setOrganizationId(TenantContext.getCurrentTenant());
 
         when(userRepository.existsByEmail("joao@example.com")).thenReturn(false);
-        doNothing().when(groupService).validateGroupIds(anySet());
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
         when(passwordEncoder.encode("123456")).thenReturn("encodedPassword");
 
@@ -270,27 +266,6 @@ class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should call group validation when creating user")
-    void create_shouldCallGroupValidation() {
-        UUID groupId = UUID.randomUUID();
-        Group group = new Group();
-        group.setId(groupId);
-
-        User user = new User();
-        user.setEmail("lucas@example.com");
-        user.setPasswordNotEncoded("123456");
-        user.setGroups(Set.of(group));
-
-        when(userRepository.existsByEmail("lucas@example.com")).thenReturn(false);
-        when(userRepository.save(any(User.class))).thenReturn(user);
-        when(passwordEncoder.encode(any())).thenReturn("encodedPass");
-
-        userService.create(user);
-
-        verify(groupService).validateGroupIds(Set.of(groupId));
-    }
-
-    @Test
     @DisplayName("Should validate and update user details")
     void update_shouldValidateAndUpdateUser() {
         UUID userId = UUID.randomUUID();
@@ -300,14 +275,12 @@ class UserServiceImplTest {
         user.setGroups(Set.of());
 
         when(userRepository.existsByEmailAndIdNot("atualizar@example.com", userId)).thenReturn(false);
-        doNothing().when(groupService).validateGroupIds(anySet());
         when(userRepository.save(user)).thenReturn(user);
 
         User updated = userService.update(user);
 
         assertEquals(user.getEmail(), updated.getEmail());
         verify(userRepository).save(user);
-        verify(groupService).validateGroupIds(anySet());
         verify(userRepository).existsByEmailAndIdNot(user.getEmail(), user.getId());
     }
 

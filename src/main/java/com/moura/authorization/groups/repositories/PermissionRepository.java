@@ -10,6 +10,6 @@ import java.util.UUID;
 
 public interface PermissionRepository extends JpaRepository<Permission, UUID> {
 
-    @Query("SELECT g.id FROM Permission g WHERE g.id IN :ids")
-    Set<UUID> findExistingIds(@Param("ids") Set<UUID> ids);
+    @Query("SELECT g FROM Permission g WHERE g.id IN :ids")
+    Set<Permission> findExistingIds(@Param("ids") Set<UUID> ids);
 }
