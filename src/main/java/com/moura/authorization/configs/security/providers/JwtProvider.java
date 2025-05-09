@@ -15,7 +15,6 @@ import java.time.Period;
 import java.util.Date;
 import java.util.UUID;
 
-@Component
 public class JwtProvider {
     @Value("${jwt.key.value}")
     private String jwtSecret;
