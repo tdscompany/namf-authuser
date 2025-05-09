@@ -46,6 +46,7 @@ public class User implements UserDetails {
     @Transient
     private String passwordNotEncoded;
 
+
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private Set<Credentials> credentials;
 
@@ -118,6 +119,11 @@ public class User implements UserDetails {
     @Override
     public String getUsername() {
         return email;
+    }
+
+    @Override
+    public String toString() {
+        return "User{id=" + id + ", email=" + email + "}";
     }
 
 }

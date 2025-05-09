@@ -11,10 +11,9 @@ import java.util.UUID;
 
 public interface GroupService {
     Group create(Group group);
-    void validateGroupIds(Set<UUID> groupIds);
+    Set<Group> validateGroupIds(Set<UUID> groupIds);
     Page<Group> findAll(Specification<Group> spec, Pageable pageable);
     void inactivate(UUID groupId);
     Group findById(UUID groupId);
-
     Group update(Group group);
 }

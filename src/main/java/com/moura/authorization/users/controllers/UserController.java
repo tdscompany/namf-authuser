@@ -1,8 +1,6 @@
 package com.moura.authorization.users.controllers;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import com.moura.authorization.users.dtos.UserDTO;
-import com.moura.authorization.users.dtos.UserFilterDTO;
+import com.moura.authorization.users.dtos.*;
 import com.moura.authorization.users.entities.User;
 import com.moura.authorization.users.repositories.specification.UserSpecification;
 import com.moura.authorization.users.services.UserService;
@@ -32,37 +30,36 @@ public class UserController {
         this.modelMapper = modelMapper;
     }
 
-    @PostMapping("/register")
+    @PostMapping()
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<UserDTO> signup(
-            @RequestBody @Validated(UserDTO.UserView.RegistrationPost.class)
-            @JsonView(UserDTO.UserView.RegistrationPost.class) UserDTO userDto) {
+    public ResponseEntity<UserOutputDTO> signup(
+            @RequestBody @Validated UserRegistrationDTO userRegistrationDTO) {
 
-        User user = modelMapper.map(userDto, User.class);
-        user.setPasswordNotEncoded(userDto.getPassword());
+        User user = modelMapper.map(userRegistrationDTO, User.class);
+        user.setPasswordNotEncoded(userRegistrationDTO.password());
 
         User created = userService.create(user);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(modelMapper.map(created, UserDTO.class));
+                .body(modelMapper.map(created, UserOutputDTO.class));
     }
     @GetMapping("/{userId}")
     @PreAuthorize("hasAuthority('user:read')")
-    public ResponseEntity<UserDTO> getById(
+    public ResponseEntity<UserOutputDTO> getById(
             @PathVariable UUID userId
     ) {
         var user = userService.findById(userId);
-        return ResponseEntity.status(HttpStatus.OK).body(modelMapper.map(user, UserDTO.class));
+        return ResponseEntity.status(HttpStatus.OK).body(modelMapper.map(user, UserOutputDTO.class));
     }
 
     @GetMapping
     @PreAuthorize("hasAuthority('user:read')")
-    public ResponseEntity<Page<UserDTO>> getAllUsers(
+    public ResponseEntity<Page<UserOutputDTO>> getAllUsers(
             @ModelAttribute UserFilterDTO filter,
             @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<UserDTO> result = userService.findAll(UserSpecification.of(filter), pageable)
-                .map(user -> modelMapper.map(user, UserDTO.class));
+        Page<UserOutputDTO> result = userService.findAll(UserSpecification.of(filter), pageable)
+                .map(user -> modelMapper.map(user, UserOutputDTO.class));
 
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
@@ -81,15 +78,15 @@ public class UserController {
 
     @PutMapping("/{userId}")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<UserDTO> update(
+    public ResponseEntity<UserOutputDTO> update(
             @PathVariable UUID userId,
-            @RequestBody @JsonView(UserDTO.UserView.UserPut.class) UserDTO userDto
+            @RequestBody UserPutDTO userDto
     ) {
-        var user = userService.findById(userId);
+        User user = userService.findById(userId);
         modelMapper.map(userDto,user);
-        var updated = userService.update(user);
+        User updated = userService.update(user);
 
-        return ResponseEntity.status(HttpStatus.OK).body(modelMapper.map(updated, UserDTO.class));
+        return ResponseEntity.status(HttpStatus.OK).body(modelMapper.map(updated, UserOutputDTO.class));
     }
 
 }

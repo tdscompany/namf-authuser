@@ -2,6 +2,7 @@ package com.moura.authorization.users.repositories;
 
 
 import com.moura.authorization.users.entities.User;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -15,38 +16,30 @@ import java.util.UUID;
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificationExecutor<User> {
     @Query("""
-      SELECT u FROM User u
-      LEFT JOIN FETCH u.groups g
-      LEFT JOIN FETCH g.permissions
-      WHERE u.email = :email
+      SELECT u FROM User u WHERE u.email = :email
     """)
     Optional<User> findByEmail(@Param("email") String email);
 
     @Override
     @Query("""
-      SELECT u FROM User u
-      LEFT JOIN FETCH u.groups g
-      LEFT JOIN FETCH g.permissions
-      WHERE u.id = :id AND u.userStatus = 'ACTIVE'
+      SELECT u FROM User u WHERE u.id = :id
     """)
     Optional<User> findById(@Param("id") UUID id);
 
     @Query("""
       SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END
       FROM User u
-      WHERE u.email = :email AND u.userStatus = 'ACTIVE'
+      WHERE u.email = :email
     """)
     boolean existsByEmail(String email);
 
-    @Query("SELECT DISTINCT u FROM User u LEFT JOIN FETCH u.groups WHERE u.id IN :ids")
+    @EntityGraph(attributePaths = {"groups"})
+    @Query("SELECT u FROM User u WHERE u.id IN :ids")
     List<User> findAllWithGroupsByIds(@Param("ids") List<UUID> ids);
 
 
     @Query("""
-      SELECT u FROM User u
-      LEFT JOIN FETCH u.groups g
-      LEFT JOIN FETCH g.permissions
-      WHERE u.id = :id AND u.organizationId = :currentTenant
+      SELECT u FROM User u WHERE u.id = :id AND u.organizationId = :currentTenant
     """)
     Optional<User> findByIdAndTenant(UUID id, UUID currentTenant);
 
