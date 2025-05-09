@@ -36,6 +36,7 @@ dependencies {
     implementation("com.auth0:java-jwt:4.4.0")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.hibernate:hibernate-jpamodelgen:6.6.13.Final")
     runtimeOnly("org.postgresql:postgresql")
