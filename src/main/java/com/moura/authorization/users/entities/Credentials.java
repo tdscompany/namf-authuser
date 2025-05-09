@@ -1,7 +1,10 @@
 package com.moura.authorization.users.entities;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -31,12 +34,12 @@ public class Credentials  {
     private LocalDateTime createdAt;
 
     @CreatedBy
-    @JoinColumn(nullable = false)
+    @JoinColumn
     @ManyToOne(fetch = FetchType.LAZY)
     private User createdBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn
     private User user;
 
     @Column(nullable = false)
@@ -46,5 +49,12 @@ public class Credentials  {
         this.password = password;
         this.active = true;
         this.user = user;
+    }
+
+    @Override
+    public String toString() {
+        return "Credentials{" +
+                "id=" + id +
+                '}';
     }
 }
